@@ -1,0 +1,10 @@
+* Agenda
+* Introduction
+* Automation with Terraform
+* IAM
+* VPC
+* Security Groups
+* KMS
+* EC2
+* S3
+* Auditing

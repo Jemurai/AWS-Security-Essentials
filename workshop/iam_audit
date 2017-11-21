@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+"""This script audits AWS IAM configuration for a series of potential security issues"""
+
+from __future__ import print_function
+
+import pprint
+import sys
+import boto3
+from botocore.exceptions import ClientError, NoCredentialsError
+
+
+def create_iam_client():
+    """This method creates an IAM object for use in the rest of the script"""
+    resource = boto3.resource('iam')
+    return resource.meta.client
+
+
+def is_mfa_enabled(iam, user):
+    """This method first checks to see if a user is able to login,
+    and then to see if they have an MFA device attached"""
+    try:
+        iam.get_login_profile(UserName=user['UserName'])
+        mfa_devices = iam.list_mfa_devices(UserName=user['UserName'])
+        if mfa_devices['MFADevices']:
+            return True
+        else:
+            return False
+    except ClientError:
+        return True
+
+
+def main():
+    """Main"""
+    iam = create_iam_client()
+    try:
+        users = iam.list_users()
+    except NoCredentialsError:
+        print("No credentials found")
+        sys.exit(1)
+
+    user_list = []
+    inactive_mfa_users = []
+
+    for user in users['Users']:
+        user_list.append(user)
+
+    while 'Marker' in users:
+        users = iam.list_users(Marker=users['Marker'])
+        for user in users['Users']:
+            user_list.append(user)
+
+    for user in user_list:
+        if not is_mfa_enabled(iam, user):
+            inactive_mfa_users.append(user['UserName'])
+
+    pprint.pprint(inactive_mfa_users)
+
+
+if __name__ == '__main__':
+    main()
