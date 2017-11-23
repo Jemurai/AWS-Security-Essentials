@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+"""This script generates a data encryption key and stores it in dynamodb"""
+
+import base64
+import pprint
+import boto3
+
+
+def main():
+    """Main"""
+    kms = boto3.client('kms')
+    master_key_id = kms.list_keys()['Keys'][0]['KeyId']
+    dek = kms.generate_data_key(
+        KeyId=master_key_id,
+        KeySpec='AES_256'
+    )
+    encoded_dek = base64.b64encode(dek['CiphertextBlob'])
+
+    dynamo = boto3.client('dynamodb')
+    dynamo.put_item(
+        TableName='data_encryption_keys',
+        Item={
+            'KeyId': {
+                'S': "application",
+            },
+            'Value': {
+                'S': encoded_dek
+            }
+        }
+    )
+
+    encrypted_key = dynamo.get_item(
+        TableName='data_encryption_keys',
+        Key={
+            'KeyId': {
+                'S': "application"
+            }
+        }
+    )
+
+    pprint.pprint(encrypted_key)
+
+
+if __name__ == '__main__':
+    main()

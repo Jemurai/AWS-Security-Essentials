@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+"""This script generates a data encryption key and stores it in dynamodb"""
+
+import base64
+import pprint
+import boto3
+from Crypto.Cipher import AES
+
+
+def encrypt(key, message):
+    """encrypt"""
+    encryption_cipher = AES.new(key, AES.MODE_GCM)
+    nonce = encryption_cipher.nonce
+    ciphertext, tag = encryption_cipher.encrypt_and_digest(message)
+    return (nonce, tag, ciphertext)
+
+
+def decrypt(key, nonce, tag, ciphertext):
+    """decrypt"""
+    decryption_cipher = AES.new(key, AES.MODE_GCM, nonce)
+    return decryption_cipher.decrypt_and_verify(ciphertext, tag)
+
+
+def fetch_encryption_key():
+    """return usable data encryption key"""
+    kms = boto3.client('kms')
+    dynamo = boto3.client('dynamodb')
+
+    encrypted_key = dynamo.get_item(
+        TableName='data_encryption_keys',
+        Key={
+            'KeyId': {
+                'S': "application"
+            }
+        }
+    )
+
+    decrypted_key = kms.decrypt(
+        CiphertextBlob=base64.decodestring(encrypted_key['Item']['Value']['S'])
+    )
+
+    return decrypted_key['Plaintext']
+
+
+def main():
+    """Main"""
+    key = fetch_encryption_key()
+    message = "Attack at dawn"
+
+    nonce, tag, ciphertext = encrypt(key, message)
+    plaintext = decrypt(key, nonce, tag, ciphertext)
+
+    pprint.pprint(plaintext)
+
+
+if __name__ == '__main__':
+    main()
