@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""This script audits AWS IAM configuration for a series of potential security issues"""
+"""This script performs a symmetric encrypt and decrypt operation using a KMS master key"""
 
 import pprint
 import boto3

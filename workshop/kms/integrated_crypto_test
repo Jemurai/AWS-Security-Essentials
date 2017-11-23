@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+"""This script performs a local AES-256-GCM encryption and decryption using a
+KMS generated data encryption key"""
+
+import pprint
+import boto3
+from Crypto.Cipher import AES
+
+
+def encrypt(key, message):
+    """encrypt"""
+    encryption_cipher = AES.new(key, AES.MODE_GCM)
+    nonce = encryption_cipher.nonce
+    ciphertext, tag = encryption_cipher.encrypt_and_digest(message)
+    return (nonce, tag, ciphertext)
+
+
+def decrypt(key, nonce, tag, ciphertext):
+    """decrypt"""
+    decryption_cipher = AES.new(key, AES.MODE_GCM, nonce)
+    return decryption_cipher.decrypt_and_verify(ciphertext, tag)
+
+
+def get_kms_master_key_id(client):
+    """fetch kms cmk id"""
+    return client.list_keys()['Keys'][0]['KeyId']
+
+
+def generate_key(client, master_key_id):
+    """generate dek"""
+    return client.generate_data_key(
+        KeyId=master_key_id,
+        KeySpec='AES_256'
+    )
+
+
+def main():
+    """Main"""
+    client = boto3.client('kms')
+    master_key_id = get_kms_master_key_id(client)
+    key = generate_key(client, master_key_id)['Plaintext']
+    message = "Attack at dawn"
+
+    nonce, tag, ciphertext = encrypt(key, message)
+    plaintext = decrypt(key, nonce, tag, ciphertext)
+
+    pprint.pprint(plaintext)
+
+
+if __name__ == '__main__':
+    main()
