@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+"""This script audits AWS IAM configuration for a series of potential security issues"""
+
+import pprint
+import boto3
+
+
+def create_kms_client():
+    """This method creates a KMS client object"""
+    return boto3.client('kms')
+
+
+def main():
+    """Main"""
+    kms = create_kms_client()
+    keys = kms.list_keys()
+    master_key = keys['Keys'][0]['KeyId']
+
+    message = "Attack at dawn"
+
+    cipher_text = kms.encrypt(
+        KeyId=master_key,
+        Plaintext=message
+    )
+
+    plain_text = kms.decrypt(
+        CiphertextBlob=cipher_text['CiphertextBlob']
+    )
+
+    pprint.pprint(plain_text['Plaintext'])
+
+
+if __name__ == '__main__':
+    main()

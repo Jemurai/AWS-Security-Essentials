@@ -4,13 +4,14 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
-ClientError	../workshop/iam_audit	/^from botocore.exceptions import ClientError, NoCredentialsError$/;"	kind:namespace	line:9
-NoCredentialsError	../workshop/iam_audit	/^from botocore.exceptions import ClientError, NoCredentialsError$/;"	kind:namespace	line:9
-boto3	../workshop/iam_audit	/^import boto3$/;"	kind:namespace	line:8
-create_iam_client	../workshop/iam_audit	/^def create_iam_client():$/;"	kind:function	line:12
-iam_audit	../workshop/iam_audit	1;"	kind:file	line:1
-is_mfa_enabled	../workshop/iam_audit	/^def is_mfa_enabled(iam, user):$/;"	kind:function	line:18
-main	../workshop/iam_audit	/^def main():$/;"	kind:function	line:32
-pprint	../workshop/iam_audit	/^import pprint$/;"	kind:namespace	line:6
-print_function	../workshop/iam_audit	/^from __future__ import print_function$/;"	kind:namespace	line:4
-sys	../workshop/iam_audit	/^import sys$/;"	kind:namespace	line:7
+ClientError	../workshop/iam/iam_audit	/^from botocore.exceptions import ClientError, NoCredentialsError$/;"	kind:namespace	line:9
+NoCredentialsError	../workshop/iam/iam_audit	/^from botocore.exceptions import ClientError, NoCredentialsError$/;"	kind:namespace	line:9
+boto3	../workshop/iam/iam_audit	/^import boto3$/;"	kind:namespace	line:8
+create_iam_client	../workshop/iam/iam_audit	/^def create_iam_client():$/;"	kind:function	line:12
+iam_audit	../workshop/iam/iam_audit	1;"	kind:file	line:1
+is_mfa_enabled	../workshop/iam/iam_audit	/^def is_mfa_enabled(iam, user):$/;"	kind:function	line:18
+kms.py	../workshop/kms/kms.py	1;"	kind:file	line:1
+main	../workshop/iam/iam_audit	/^def main():$/;"	kind:function	line:32
+pprint	../workshop/iam/iam_audit	/^import pprint$/;"	kind:namespace	line:6
+print_function	../workshop/iam/iam_audit	/^from __future__ import print_function$/;"	kind:namespace	line:4
+sys	../workshop/iam/iam_audit	/^import sys$/;"	kind:namespace	line:7
