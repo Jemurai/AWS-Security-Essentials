@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+"""This script audits AWS IAM configuration for a series of potential security issues"""
+
+import sys
+import pprint
+from datetime import datetime
+import pytz
+import boto3
+from botocore.exceptions import NoCredentialsError
+
+
+def create_iam_client():
+    """This method creates an IAM object for use in the rest of the script"""
+    resource = boto3.resource('iam')
+    return resource.meta.client
+
+
+def access_key_used_recently(iam, user):
+    """Determine if account has been used recently"""
+    access_keys = iam.list_access_keys(UserName=user["UserName"])
+    for key in access_keys["AccessKeyMetadata"]:
+        last_used = iam.get_access_key_last_used(
+            AccessKeyId=key["AccessKeyId"])
+        if key["Status"] == "Active" and "LastUsedDate" in last_used["AccessKeyLastUsed"]:
+            if (datetime.utcnow().replace(tzinfo=pytz.UTC) - last_used["AccessKeyLastUsed"]["LastUsedDate"]).days < 90:
+                return True
+    return False
+
+
+def main():
+    """Main"""
+    iam = create_iam_client()
+    try:
+        users = iam.list_users()
+    except NoCredentialsError:
+        print("No credentials found")
+        sys.exit(1)
+
+    user_list = []
+    inactive_users = []
+
+    for user in users['Users']:
+        user_list.append(user)
+
+    while 'Marker' in users:
+        users = iam.list_users(Marker=users['Marker'])
+        for user in users['Users']:
+            user_list.append(user)
+
+    for user in user_list:
+        if not access_key_used_recently(iam, user):
+            inactive_users.append(user['UserName'])
+
+    pprint.pprint(inactive_users)
+
+
+if __name__ == '__main__':
+    main()

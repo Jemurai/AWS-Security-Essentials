@@ -5,6 +5,6 @@
 * INPROGRESS Credential Management
 * INPROGRESS VPC
 * INPROGRESS Security Groups
-* TODO KMS
+* INPROGRESS KMS
 * TODO Auditing
 * TODO Continuous Integration
