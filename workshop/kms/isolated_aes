@@ -7,16 +7,16 @@ from Crypto.Cipher import AES
 
 def encrypt(key, message):
     """encrypt"""
-    encryption_cipher = AES.new(key, AES.MODE_GCM)
-    nonce = encryption_cipher.nonce
-    ciphertext, tag = encryption_cipher.encrypt_and_digest(message)
+    cipher = AES.new(key, AES.MODE_GCM)
+    nonce = cipher.nonce
+    ciphertext, tag = cipher.encrypt_and_digest(message)
     return (nonce, tag, ciphertext)
 
 
 def decrypt(key, nonce, tag, ciphertext):
     """decrypt"""
-    decryption_cipher = AES.new(key, AES.MODE_GCM, nonce)
-    return decryption_cipher.decrypt_and_verify(ciphertext, tag)
+    cipher = AES.new(key, AES.MODE_GCM, nonce)
+    return cipher.decrypt_and_verify(ciphertext, tag)
 
 
 def main():

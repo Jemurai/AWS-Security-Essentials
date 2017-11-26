@@ -5,22 +5,14 @@ import pprint
 import boto3
 
 
-def create_kms_client():
-    """This method creates a KMS client object"""
-    return boto3.client('kms')
-
-
 def main():
     """Main"""
-    kms = create_kms_client()
+    kms = boto3.client('kms')
     keys = kms.list_keys()
-    master_key = keys['Keys'][0]['KeyId']
-
-    message = "Attack at dawn"
 
     cipher_text = kms.encrypt(
-        KeyId=master_key,
-        Plaintext=message
+        KeyId=keys['Keys'][0]['KeyId'],
+        Plaintext="Attack at dawn"
     )
 
     plain_text = kms.decrypt(

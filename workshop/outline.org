@@ -4,8 +4,15 @@
 * INPROGRESS Automation with Terraform
 * INPROGRESS IAM
 * INPROGRESS Credential Management
-* INPROGRESS VPC
-* INPROGRESS Security Groups
-* INPROGRESS KMS
-* INPROGRESS Auditing
+* INPROGRESS Network Design [0/3]
+** TODO Update AWS region to Australia
+** TODO Run examples and capture output
+** TODO Slides
+* INPROGRESS KMS [0/2]
+** TODO Update AWS region to Australia
+** TODO Run examples and capture output
+* INPROGRESS Auditing [0/3]
+** TODO Update AWS region to Australia
+** TODO Run examples and capture output
+** TODO Get a more detailed set of information about what cloudtrail tracks
 * TODO Continuous Integration

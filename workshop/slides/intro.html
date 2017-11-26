@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>AWS Security Essentials - Introduction</title>
+    <title>AWS Security Essentials</title>
 
     <link rel="stylesheet" href="css/reveal.css">
-    <link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="css/theme/solarized.css">
 
     <!-- Theme used for syntax highlighting of code -->
     <link rel="stylesheet" href="lib/css/zenburn.css">
@@ -25,7 +25,7 @@
     <div class="reveal">
       <div class="slides">
 	<section>
-	  <h2>AWS Security Essentials Introduction</h2>
+	  <h2>AWS Security Essentials</h2>
 	  <p>
 	    <small>
 	      Aaron Bedra <a href="https://twitter.com/abedra">@abedra</a>
@@ -40,10 +40,10 @@
 	    <li>Setup</li>
 	    <li>Introduction</li>
 	    <li>Terraform</li>
+	    <li>Auditing</li>
 	    <li>IAM</li>
 	    <li>Network Design</li>
 	    <li>Encryption and Key Management</li>
-	    <li>Configuration Auditing</li>
 	    <li>Continuous Integration</li>
 	    <li>Wrap Up</li>
 	  </ul>
@@ -54,7 +54,17 @@
 	    <h2>Setup</h2>
 	  </section>
 	  <section>
-	    <h2>TODO</h2>
+	    <h2>Checklist</h2>
+	    <ul>
+	      <li>A clone of this repository</li>
+	      <li>Docker</li>
+	      <li>Terraform</li>
+	      <li>An AWS account with full administrative permissions</li>
+	      <li>A working internet connection</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>Please correct any of these issues during the introduction talk</h2>
 	  </section>
 	</section>
 
@@ -67,22 +77,231 @@
 	    <h2>Terraform</h2>
 	  </section>
 	  <section>
-	    <h2>TODO</h2>
+	    <h2>Infrastructure Automation</h2>
+	  </section>
+	  <section>
+	    <h2>As noted in the intro talk, this is an important first step</h2>
+	  </section>
+	  <section>
+	    <h2>We will be using terraform throughout the workshop to setup our AWS resources</h2>
+	  </section>
+	  <section>
+	    <h2>There are other automation options</h2>
+	  </section>
+	  <section>
+	    <h2>To save time please use the terraform code provided</h2>
+	  </section>
+	  <section>
+	    <h2>Feel free to translate this code to any other tool of your choice</h2>
+	  </section>
+	  <section>
+	    <h2>And don't hesitate to ask any questions</h2>
+	  </section>
+	  <section>
+	    <h2>Our initial script</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+provider "aws" {
+    region = "us-east-2"
+}
+
+resource "aws_s3_bucket" "abedra-workshop-tfstate" {
+    bucket = "abedra-workshop-tfstate"
+    acl = "private"
+    versioning {
+        enabled  = true
+    }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>This script creates a single S3 bucket</h2>
+	  </section>
+	  <section>
+	    <p>Open the <em>workshop/terraform/setup.tf</em> file and change the name of the bucket to your desired name</p>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/terraform> terraform init
+workshop/terraform> terraform plan
+workshop/terraform> terraform apply
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Throughout the workshop we will use this bucket to store our terraform state</h2>
+	  </section>
+	  <section>
+	    <h2>Let's update our script to point terraform to our new bucket</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+terraform {
+    backend "s3" {
+        bucket = "abedra-workshop-tfstate"
+        key = "setup/terraform.tfstate"
+        region = "us-east-2"
+    }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Doing this requires us to reinitialize terraform</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/terraform> terraform init
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>After initialization our terraform state fill will be in the designated bucket</h2>
+	  </section>
+	  <section>
+	    <h2>Check the buket in your AWS console to make sure this worked properly</h2>
+	  </section>
+	  <section>
+	    <h2>You don't have to store your tfstate in S3 during this workshop</h2>
+	  </section>
+	  <section>
+	    <h2>But if you are working with others in the same account it is recommended</h2>
+	  </section>
+	  <section>
+	    <h2>Questions?</h2>
+	  </section>
+	</section>
+
+	<section>
+	  <section>
+	    <h2>Auditing</h2>
+	  </section>
+	  <section>
+	    <h2>How do we know our AWS configuration doesn't have security issues?</h2>
+	  </section>
+	  <section>
+	    <h2>Questions</h2>
+	    <ul>
+	      <li>Do all our users have MFA enabled?</li>
+	      <li>Do we have inactive users?</li>
+	      <li>Do we have security groups that expose too much?</li>
+	      <li>Do we have S3 buckets with improper access control?</li>
+	      <li>How do we know that our users aren't abusing their permissions?</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>Let's ask!</h2>
+	    <pre>
+	      <code data-trim class="python">
+workshop/auditing> ./mfa_audit
+[]
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="python">
+workshop/auditing> ./inactive_user_audit
+[]
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>We could go on all with one off scripts</h2>
+	  </section>
+	  <section>
+	    <h2>Let's try something a little more effective</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/auditing> docker build -t audit .
+workshop/auditing> docker run \
+-e AWS_ACCESS_KEY_ID=XXX      \
+-e AWS_SECRET_ACCESS_KEY=xxx  \
+audit
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Results</h2>
+	    <pre>
+	      <code data-trim class="shell">
+TODO
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Exercise: Fix the issues</h2>
+	  </section>
+	  <section>
+	    <h2>What we just ran is called Scout2</h2>
+	  </section>
+	  <section>
+	    <h2>Full Walkthrough</h2>
+	  </section>
+	  <section>
+	    <h2>There is also commercial tooling, but this is a great way to demonstrate ability</h2>
+	  </section>
+	  <section>
+	    <h2>Pick and choose your battles, not everything you find is an emergency</h2>
+	  </section>
+	  <section>
+	    <h2>This gets us configuration auditing, but what about user activity?</h2>
+	  </section>
+	  <section>
+	    <h2>Cloudtrail</h2>
+	  </section>
+	  <section>
+	    <h2>Cloudtrail logs all activity to the AWS API</h2>
+	  </section>
+	  <section>
+	    <h2>These logs provide actionable data that you can use to automate security response</h2>
+	  </section>
+	  <section>
+	    <h2>You can even feed Cloudtrail logs into a SIEM</h2>
+	  </section>
+	  <section>
+	    <h2>Setup</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/auditing> terraform init
+workshop/auditing> terraform plan
+workshop/auditing> terraform apply
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>You just enabled Cloudtrail and created an S3 bucket to store the logs</h2>
+	  </section>
+	  <section>
+	    <h2>Navigate to the S3 bucket in the AWS console</h2>
+	  </section>
+	  <section>
+	    <h2>Check back throughout the day to see what ends up there</h2>
+	  </section>
+	  <section>
+	    <h2>Let's walk through a real world scenario</h2>
+	  </section>
+	  <section>
+	    <h4>https://aws.amazon.com/blogs/security/how-to-receive-notifications-when-your-aws-accounts-root-access-keys-are-used/</h4>
+	  </section>
+	  <section>
+	    <h2>Setting up alarms like this can be a key differentiator in detecting and understanding a breach</h2>
+	  </section>
+	  <section>
+	    <h2>Other Alarm Possibilities</h2>
+	    <ul>
+	      <li>Unusually high amout of KMS actions</li>
+	      <li>New user created</li>
+	      <li>Access keys created for the root account</li>
+	      <li>Access keys used for the root account</li>
+	      <li>Anyone logs into the AWS console</li>
+	      <li>Anything that would signal unexpected behavior</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>Questions?</h2>
 	  </section>
 	</section>
 
 	<section>
 	  <section>
 	    <h2>IAM</h2>
-	  </section>
-	  <section>
-	    <h2>TODO</h2>
-	  </section>
-	</section>
-
-	<section>
-	  <section>
-	    <h2>VPC</h2>
 	  </section>
 	  <section>
 	    <h2>TODO</h2>
@@ -103,16 +322,272 @@
 	    <h2>Encryption and Key Management</h2>
 	  </section>
 	  <section>
-	    <h2>TODO</h2>
+	    <h2>Let's set a baseline</h2>
 	  </section>
-	</section>
+	  <section>
+	    <h2>The Problem</h2>
+	  </section>
+	  <section>
+	    <h2>Encrypt an unknown amount of data at rest</h2>
+	  </section>
+	  <section>
+	    <h2>We should rely on symmetric encryption for this</h2>
+	  </section>
+	  <section>
+	    <h2>In particular, AES</h2>
+	  </section>
+	  <section>
+	    <h2>For this workshop we will use AES-256-GCM</h2>
+	  </section>
+	  <section>
+	    <h2>A breakdown</h2>
+	    <ul>
+	      <li>AES is the cipher core</li>
+	      <li>256 is length of the key in bits</li>
+	      <li>GCM, short for Galois Counter Mode, is the cipher block mode</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>There are other AES options, but this is the strongest choice*</h2>
+	  </section>
+	  <section>
+	    <h4>Example</h4>
+	    <pre>
+	      <code data-trim class="python">
+def encrypt(key, message):
+    cipher = AES.new(key, AES.MODE_GCM)
+    nonce = ciher.nonce
+    ciphertext, tag = cipher.encrypt_and_digest(message)
+    return (nonce, tag, ciphertext)
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="python">
+def decrypt(key, nonce, tag, ciphertext):
+    cipher = AES.new(key, AES.MODE_GCM, nonce)
+    return cipher.decrypt_and_verify(ciphertext, tag)
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h4>Usage</h4>
+	    <pre>
+	      <code data-trim class="python">
+def main():
+    message = "Attack at dawn"
+    key = "ThisIsASecretKeyAReallySecretKey"
 
-	<section>
-	  <section>
-	    <h2>Configuration Auditing</h2>
+    nonce, tag, ciphertext = encrypt(key, message)
+    plaintext = decrypt(key, nonce, tag, ciphertext)
+    pprint.pprint(plaintext)
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/kms> ./isolated_aes
+'Attack at dawn'
+	      </code>
+	    </pre>
 	  </section>
 	  <section>
-	    <h2>TODO</h2>
+	    <h2>Questions</h2>
+	    <ul>
+	      <li>Does this solve our encryption problem?</li>
+	      <li>How do we get a better key?</li>
+	      <li>How do we protect the key material?</li>
+	      <li>Is one encryption key enough?</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>Amazon KMS</h2>
+	  </section>
+	  <section>
+	    <h2>A hardware backed symmetric encryption service available via a simple API</h2>
+	  </section>
+	  <section>
+	    <h2>If you are encrypting anything inside of AWS, you should be using this service</h2>
+	  </section>
+	  <section>
+	    <h2>Any AWS service that stores data has a KMS option</h2>
+	  </section>
+	  <section>
+	    <h2>If you can, design your system to use RDS with KMS for data at rest</h2>
+	  </section>
+	  <section>
+	    <h2>Let's explore the other path</h2>
+	  </section>
+	  <section>
+	    <h2>Setup</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/kms> terraform init
+workshop/kms> terraform plan
+workshop/kms> terraform apply
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>This creates a KMS key with an alias and a dynamodb table</h2>
+	  </section>
+	  <section>
+	    <h2>We will use two types of encryption keys</h2>
+	    <ul>
+	      <li>Key Encryption Keys (KEK)</li>
+	      <li>Data Encryption Keys (DEK)</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>The dynamodb table is for data encryption keys</h2>
+	  </section>
+	  <section>
+	    <h2>Let's start with our KMS master key</h2>
+	  </section>
+	  <section>
+	    <pre>
+	      <code data-trim class="python">
+def main():
+    kms = boto3.client('kms')
+    keys = kms.list_keys()
+
+    cipher_text = kms.encrypt(
+        KeyId=keys['Keys'][0]['KeyId'],
+        Plaintext="Attack at dawn"
+    )
+
+    plain_text = kms.decrypt(
+        CiphertextBlob=cipher_text['CiphertextBlob']
+    )
+
+    pprint.pprint(plain_text['Plaintext'])
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/kms> ./kms_master_test
+'Attack at dawn'
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>This creates a black box encryption scenario with no abiliity to gain control of key material or change the encrption process</h2>
+	  </section>
+	  <section>
+	    <h2>The downside is that it only works for data up to 4 kilobytes in size</h2>
+	  </section>
+	  <section>
+	    <h2>To solve our stated problem we will need to combine our use of KMS and isolated encryption</h2>
+	  </section>
+	  <section>
+	    <h2>We do this by using KMS to generate and encrypt data encryption keys</h2>
+	  </section>
+	  <section>
+	    <h2>We store our encrypted data encryption keys in dynamodb</h2>
+	  </section>
+	  <section>
+	    <h2>Let's generate a DEK and insert it into dynamodb</h2>
+	  </section>
+	  <section>
+	    <pre>
+	      <code data-trim class="python">
+def main():
+    kms = boto3.client('kms')
+    master_key_id = kms.list_keys()['Keys'][0]['KeyId']
+    dek = kms.generate_data_key(KeyId=master_key_id,
+                                KeySpec='AES_256')
+    encoded_dek = base64.b64encode(dek['CiphertextBlob'])
+
+    dynamo = boto3.client('dynamodb')
+    dynamo.put_item(
+        TableName='data_encryption_keys',
+        Item={
+            'KeyId': { 'S': "application" },
+            'Value': { 'S': encoded_dek   }
+        })
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/kms> ./insert_dek
+TODO
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Let's do an end to end encryption operation using our dynamodb and kms backed encryption keys</h2>
+	  </section>
+	  <section>
+	    <h4>Fetch and decrypt DEK</h4>
+	    <pre>
+	      <code data-trim class="python">
+def fetch_encryption_key():
+    kms = boto3.client('kms')
+    dynamo = boto3.client('dynamodb')
+
+    encrypted_key = dynamo.get_item(
+        TableName='data_encryption_keys',
+        Key={ 'KeyId': { 'S': "application" } }
+    )
+
+    return kms.decrypt(
+        CiphertextBlob=base64.decodestring(
+            encrypted_key['Item']['Value']['S']
+        )
+    )['Plaintext']
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <pre>
+	      <code data-trim class="python">
+def main():
+    key = fetch_encryption_key()
+    message = "Attack at dawn"
+
+    nonce, tag, ciphertext = encrypt(key, message)
+    plaintext = decrypt(key, nonce, tag, ciphertext)
+
+    pprint.pprint(plaintext)
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/kms> ./dynamo_backed_aes
+'Attack at dawn'
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>This assumes a single data encryption key for all data in an application</h2>
+	  </section>
+	  <section>
+	    <h2>Other Options</h2>
+	    <ul>
+	      <li>A DEK per customer</li>
+	      <li>A DEK per record</li>
+	      <li>A DEK per shard</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>When using multiple DEKs, make sure to store the key id with the record in the database</h2>
+	  </section>
+	  <section>
+	    <h2>Questions</h2>
+	    <ul>
+	      <li>Does this solve our encryption problem?</li>
+	      <li>How do we get a better key?</li>
+	      <li>How do we protect the key material?</li>
+	      <li>Is one encryption key enough?</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>Clean Up</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/kms> terraform destroy
+	      </code>
+	    </pre>
 	  </section>
 	</section>
 

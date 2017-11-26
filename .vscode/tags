@@ -4,14 +4,64 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
-ClientError	../workshop/iam/iam_audit	/^from botocore.exceptions import ClientError, NoCredentialsError$/;"	kind:namespace	line:9
-NoCredentialsError	../workshop/iam/iam_audit	/^from botocore.exceptions import ClientError, NoCredentialsError$/;"	kind:namespace	line:9
-boto3	../workshop/iam/iam_audit	/^import boto3$/;"	kind:namespace	line:8
-create_iam_client	../workshop/iam/iam_audit	/^def create_iam_client():$/;"	kind:function	line:12
-iam_audit	../workshop/iam/iam_audit	1;"	kind:file	line:1
-is_mfa_enabled	../workshop/iam/iam_audit	/^def is_mfa_enabled(iam, user):$/;"	kind:function	line:18
-kms.py	../workshop/kms/kms.py	1;"	kind:file	line:1
-main	../workshop/iam/iam_audit	/^def main():$/;"	kind:function	line:32
-pprint	../workshop/iam/iam_audit	/^import pprint$/;"	kind:namespace	line:6
-print_function	../workshop/iam/iam_audit	/^from __future__ import print_function$/;"	kind:namespace	line:4
-sys	../workshop/iam/iam_audit	/^import sys$/;"	kind:namespace	line:7
+AES	../workshop/kms/dynamo_local_crypto_test	/^from Crypto.Cipher import AES$/;"	kind:namespace	line:7
+AES	../workshop/kms/integrated_crypto_test	/^from Crypto.Cipher import AES$/;"	kind:namespace	line:7
+AES	../workshop/kms/local_crypto_test	/^from Crypto.Cipher import AES$/;"	kind:namespace	line:5
+ClientError	../workshop/auditing/iam_audit	/^from botocore.exceptions import ClientError, NoCredentialsError$/;"	kind:namespace	line:9
+NoCredentialsError	../workshop/auditing/iam_audit	/^from botocore.exceptions import ClientError, NoCredentialsError$/;"	kind:namespace	line:9
+NoCredentialsError	../workshop/auditing/inactive_user_audit	/^from botocore.exceptions import NoCredentialsError$/;"	kind:namespace	line:9
+access_key_used_recently	../workshop/auditing/inactive_user_audit	/^def access_key_used_recently(iam, user):$/;"	kind:function	line:18
+audit	../workshop/auditing/audit	1;"	kind:file	line:1
+base64	../workshop/kms/dynamo_local_crypto_test	/^import base64$/;"	kind:namespace	line:4
+base64	../workshop/kms/insert_dek	/^import base64$/;"	kind:namespace	line:4
+boto3	../workshop/auditing/iam_audit	/^import boto3$/;"	kind:namespace	line:8
+boto3	../workshop/auditing/inactive_user_audit	/^import boto3$/;"	kind:namespace	line:8
+boto3	../workshop/kms/dynamo_local_crypto_test	/^import boto3$/;"	kind:namespace	line:6
+boto3	../workshop/kms/insert_dek	/^import boto3$/;"	kind:namespace	line:6
+boto3	../workshop/kms/integrated_crypto_test	/^import boto3$/;"	kind:namespace	line:6
+boto3	../workshop/kms/kms_cmk_test	/^import boto3$/;"	kind:namespace	line:5
+call	../workshop/auditing/audit	/^from subprocess import call$/;"	kind:namespace	line:6
+create_iam_client	../workshop/auditing/iam_audit	/^def create_iam_client():$/;"	kind:function	line:12
+create_iam_client	../workshop/auditing/inactive_user_audit	/^def create_iam_client():$/;"	kind:function	line:12
+create_kms_client	../workshop/kms/kms_cmk_test	/^def create_kms_client():$/;"	kind:function	line:8
+danger_issues	../workshop/auditing/audit	/^                danger_issues = True$/;"	kind:variable	line:21
+danger_issues	../workshop/auditing/audit	/^danger_issues = False$/;"	kind:variable	line:15
+data	../workshop/auditing/audit	/^    data = load(data_file)$/;"	kind:variable	line:13
+datetime	../workshop/auditing/inactive_user_audit	/^from datetime import datetime$/;"	kind:namespace	line:6
+decrypt	../workshop/kms/dynamo_local_crypto_test	/^def decrypt(key, nonce, tag, ciphertext):$/;"	kind:function	line:18
+decrypt	../workshop/kms/integrated_crypto_test	/^def decrypt(key, nonce, tag, ciphertext):$/;"	kind:function	line:18
+decrypt	../workshop/kms/local_crypto_test	/^def decrypt(key, nonce, tag, ciphertext):$/;"	kind:function	line:16
+dynamo_local_crypto_test	../workshop/kms/dynamo_local_crypto_test	1;"	kind:file	line:1
+encrypt	../workshop/kms/dynamo_local_crypto_test	/^def encrypt(key, message):$/;"	kind:function	line:10
+encrypt	../workshop/kms/integrated_crypto_test	/^def encrypt(key, message):$/;"	kind:function	line:10
+encrypt	../workshop/kms/local_crypto_test	/^def encrypt(key, message):$/;"	kind:function	line:8
+fetch_encryption_key	../workshop/kms/dynamo_local_crypto_test	/^def fetch_encryption_key():$/;"	kind:function	line:24
+generate_key	../workshop/kms/integrated_crypto_test	/^def generate_key(client, master_key_id):$/;"	kind:function	line:29
+get_kms_master_key_id	../workshop/kms/integrated_crypto_test	/^def get_kms_master_key_id(client):$/;"	kind:function	line:24
+iam_audit	../workshop/auditing/iam_audit	1;"	kind:file	line:1
+inactive_user_audit	../workshop/auditing/inactive_user_audit	1;"	kind:file	line:1
+insert_dek	../workshop/kms/insert_dek	1;"	kind:file	line:1
+integrated_crypto_test	../workshop/kms/integrated_crypto_test	1;"	kind:file	line:1
+is_mfa_enabled	../workshop/auditing/iam_audit	/^def is_mfa_enabled(iam, user):$/;"	kind:function	line:18
+kms_cmk_test	../workshop/kms/kms_cmk_test	1;"	kind:file	line:1
+load	../workshop/auditing/audit	/^from json import load$/;"	kind:namespace	line:7
+local_crypto_test	../workshop/kms/local_crypto_test	1;"	kind:file	line:1
+main	../workshop/auditing/iam_audit	/^def main():$/;"	kind:function	line:32
+main	../workshop/auditing/inactive_user_audit	/^def main():$/;"	kind:function	line:30
+main	../workshop/kms/dynamo_local_crypto_test	/^def main():$/;"	kind:function	line:45
+main	../workshop/kms/insert_dek	/^def main():$/;"	kind:function	line:9
+main	../workshop/kms/integrated_crypto_test	/^def main():$/;"	kind:function	line:37
+main	../workshop/kms/kms_cmk_test	/^def main():$/;"	kind:function	line:13
+main	../workshop/kms/local_crypto_test	/^def main():$/;"	kind:function	line:22
+pprint	../workshop/auditing/iam_audit	/^import pprint$/;"	kind:namespace	line:6
+pprint	../workshop/auditing/inactive_user_audit	/^import pprint$/;"	kind:namespace	line:5
+pprint	../workshop/kms/dynamo_local_crypto_test	/^import pprint$/;"	kind:namespace	line:5
+pprint	../workshop/kms/insert_dek	/^import pprint$/;"	kind:namespace	line:5
+pprint	../workshop/kms/integrated_crypto_test	/^import pprint$/;"	kind:namespace	line:5
+pprint	../workshop/kms/kms_cmk_test	/^import pprint$/;"	kind:namespace	line:4
+pprint	../workshop/kms/local_crypto_test	/^import pprint$/;"	kind:namespace	line:4
+print_function	../workshop/auditing/iam_audit	/^from __future__ import print_function$/;"	kind:namespace	line:4
+pytz	../workshop/auditing/inactive_user_audit	/^import pytz$/;"	kind:namespace	line:7
+sys	../workshop/auditing/iam_audit	/^import sys$/;"	kind:namespace	line:7
+sys	../workshop/auditing/inactive_user_audit	/^import sys$/;"	kind:namespace	line:4
+system	../workshop/auditing/audit	/^from os import system$/;"	kind:namespace	line:5
