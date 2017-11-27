@@ -26,11 +26,16 @@
    CLOSED: [2017-11-27 Mon 15:46]
 ** DONE Run examples and capture output
    CLOSED: [2017-11-27 Mon 15:47]
-* INPROGRESS Network Design [0/4]
-** TODO Update AWS region to Australia
-** TODO Run examples and capture output
-** TODO Finish terraform scripts
-** TODO Slides
+* DONE Network Design [4/4]
+  CLOSED: [2017-11-27 Mon 22:10]
+** DONE Update AWS region to Australia
+   CLOSED: [2017-11-27 Mon 22:10]
+** DONE Run examples and capture output
+   CLOSED: [2017-11-27 Mon 22:10]
+** DONE Finish terraform scripts
+   CLOSED: [2017-11-27 Mon 22:10]
+** DONE Slides
+   CLOSED: [2017-11-27 Mon 22:10]
 * DONE KMS [2/2]
   CLOSED: [2017-11-27 Mon 16:34]
 ** DONE Update AWS region to Australia

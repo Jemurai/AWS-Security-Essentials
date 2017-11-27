@@ -571,7 +571,7 @@ workshop/iam> aws-vault exec personal-read_only -- aws s3 ls
 	    <h2>Network Design</h2>
 	  </section>
 	  <section>
-	    <h2>Before we get started, the number on rule...</h2>
+	    <h2>Before we get started, the number one rule...</h2>
 	  </section>
 	  <section>
 	    <h2>Keep it simple</h2>
@@ -598,18 +598,157 @@ workshop/iam> aws-vault exec personal-read_only -- aws s3 ls
 	    <h2>Start with the foundation</h2>
 	    <pre>
 	      <code data-trim class="terraform">
-resource "aws_vpc" "workshop" {
+resource "aws_vpc" "yow" {
     cidr_block = "10.1.0.0/16"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Add a subnet</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_subnet" "yow_subnet" {
+    vpc_id = "${aws_vpc.yow.id}"
+    cidr_block = "10.1.0.0/24"
+    availability_zone = "ap-southeast-2a"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>This is the internal mapping for our environment</h2>
+	  </section>
+	  <section>
+	    <h2>Anything we create from here should be attached to the vpc</h2>
+	  </section>
+	  <section>
+	    <h2>Let's create a security group for external SSH access</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_security_group" "bastion_external" {
+    name = "bastion_external_security_group"
+    description = "Allowed external ports for bastion hosts"
+    vpc_id = "${aws_vpc.yow.id}"
 
-    tags {
-        Name = "main"
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
     }
 }
 	      </code>
 	    </pre>
 	  </section>
 	  <section>
-	    <h2></h2>
+	    <h2>Any rule open to 0.0.0.0/0 should be carefully considered</h2>
+	  </section>
+	  <section>
+	    <h2>Notice we named our rule bastion to indicate that it should be used for SSH bastion hosts only</h2>
+	  </section>
+	  <section>
+	    <h2>External SSH access should be disabled for all but basion hosts</h2>
+	  </section>
+	  <section>
+	    <h2>The only exception would be if you had a VPN etablished</h2>
+	  </section>
+	  <section>
+	    <h2>With a VPN you would only allow SSH access to IPs in the VPC</h2>
+	  </section>
+	  <section>
+	    <h2>Let's create an internal SSH rule</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_security_group" "internal_ssh" {
+    name = "bastion_internal_security_group"
+    description = "Allow SSH via internal instances"
+    vpc_id = "${aws_vpc.yow.id}"
+
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["10.1.0.0/16"]
+    }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>And a bastion host</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_instance" "bastion" {
+    ami = "ami-ccecf5af"
+    instance_type = "t2.micro"
+    associate_public_ip_address = true
+    vpc_security_group_ids = [
+      "${aws_security_group.bastion_external.id}"
+    ]
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Check the console to see inbound rules</h2>
+	  </section>
+	  <section>
+	    <h2>Or use the nmap docker image</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/vpc> docker build -t nmap .
+workshop/vpc> docker run nmap -Pn -T5 -sS -A [bastion_ip]
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Now let's add an inbound web security group</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_security_group" "api_security_group" {
+    name = "api_security_group"
+    description = "Allowed inbound ports for api"
+    vpc_id = "${aws_vpc.yow.id}"
+
+    ingress {
+        from_port = 80
+        to_port = 80
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>And a web instance</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_instance" "api" {
+    ami = "ami-ccecf5af"
+    instance_type = "t2.micro"
+    associate_public_ip_address = true
+    subnet_id = "${aws_subnet.yow_subnet.id}"
+    vpc_security_group_ids = [
+        "${aws_security_group.api_security_group.id}",
+        "${aws_security_group.internal_ssh.id}"
+    ]
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Again, check the console to see inbound rules</h2>
+	  </section>
+	  <section>
+	    <h2>We could keep going, but this is a good start</h2>
+	  </section>
+	  <section>
+	    <h2>Remember to keep things simple, but maintain proper boundaries</h2>
+	  </section>
+	  <section>
+	    <h2>Questions?</h2>
 	  </section>
 	</section>
 
@@ -890,7 +1029,7 @@ complete
 	    <h2>When using multiple DEKs, make sure to store the key id with the record in the database</h2>
 	  </section>
 	  <section>
-	    <h2>Questions</h2>
+	    <h2>Wrap Up</h2>
 	    <ul>
 	      <li>Does this solve our encryption problem?</li>
 	      <li>How do we get a better key?</li>

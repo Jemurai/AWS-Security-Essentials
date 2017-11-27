@@ -2,13 +2,13 @@ provider "aws" {
     region = "ap-southeast-2"
 }
 
-# terraform {
-#     backend "s3" {
-#         bucket = "abedra-yow-tfstate"
-#         key = "auditing/terraform.tfstate"
-#         region = "ap-southeast-2"
-#     }
-# }
+terraform {
+    backend "s3" {
+        bucket = "abedra-yow-tfstate"
+        key = "auditing/terraform.tfstate"
+        region = "ap-southeast-2"
+    }
+}
 
 resource "aws_s3_bucket" "abedra-yow-audit" {
     bucket = "abedra-yow-audit"
