@@ -102,11 +102,11 @@
 	    <pre>
 	      <code data-trim class="terraform">
 provider "aws" {
-    region = "us-east-2"
+    region = "ap-southeast-2"
 }
 
-resource "aws_s3_bucket" "abedra-workshop-tfstate" {
-    bucket = "abedra-workshop-tfstate"
+resource "aws_s3_bucket" "abedra-yow-tfstate" {
+    bucket = "abedra-yow-tfstate"
     acl = "private"
     versioning {
         enabled  = true
@@ -137,9 +137,9 @@ workshop/terraform> terraform apply
 	      <code data-trim class="terraform">
 terraform {
     backend "s3" {
-        bucket = "abedra-workshop-tfstate"
+        bucket = "abedra-yow-tfstate"
         key = "setup/terraform.tfstate"
-        region = "us-east-2"
+        region = "ap-southeast-2"
     }
 }
 	      </code>
@@ -203,7 +203,7 @@ workshop/auditing> ./inactive_user_audit
 	    </pre>
 	  </section>
 	  <section>
-	    <h2>We could go on all with one off scripts</h2>
+	    <h2>We could go on all day with one off scripts</h2>
 	  </section>
 	  <section>
 	    <h2>Let's try something a little more effective</h2>
@@ -221,12 +221,19 @@ audit
 	    <h2>Results</h2>
 	    <pre>
 	      <code data-trim class="shell">
-TODO
+Creating scout2-report/report.html ...
+[iam] Root account used recently : 1
+[iam] Minimum password length too short : 1
+[iam] Password expiration disabled : 1
+[cloudtrail] Not configured : 13
+[cloudtrail] Log file validation disabled : 1
+[ec2] SSH port open to all : 1
+[vpc] Subnet with allow all egress NACLs : 32
+[vpc] Subnet with allow all ingress NACLs : 32
+Scout2 danger issues identified. Please correct the issues
+listed above. See scout2-report/report.html for more details
 	      </code>
 	    </pre>
-	  </section>
-	  <section>
-	    <h2>Exercise: Fix the issues</h2>
 	  </section>
 	  <section>
 	    <h2>What we just ran is called Scout2</h2>
@@ -236,6 +243,9 @@ TODO
 	  </section>
 	  <section>
 	    <h2>There is also commercial tooling, but this is a great way to demonstrate ability</h2>
+	  </section>
+	  <section>
+	    <h2>Exercise: Fix the issues</h2>
 	  </section>
 	  <section>
 	    <h2>Pick and choose your battles, not everything you find is an emergency</h2>
@@ -275,6 +285,27 @@ workshop/auditing> terraform apply
 	    <h2>Check back throughout the day to see what ends up there</h2>
 	  </section>
 	  <section>
+	    <pre>
+	      <code data-trim class="json">
+{
+  "eventVersion":"1.02","userIdentity": {
+    "type":"Root",
+    "principalId":"489175270805",
+    "arn":"arn:aws:iam::489175270805:root",
+    "accountId":"489175270805",
+    "accessKeyId":"ASIAIYHVC5VYM22SHTXQ",
+  },
+  "eventTime":"2017-11-24T22:12:51Z",
+  "eventName":"GetAccountPasswordPolicy",
+  "sourceIPAddress":"199.27.255.43",
+  "requestID":"9c81b384-d164-11e7-b896-bb38c46dd0a0",
+  "eventID":"35ba2cdd-7b76-40bc-aeca-3b7283518bae",
+  "eventType":"AwsApiCall","recipientAccountId":"489175270805"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
 	    <h2>Let's walk through a real world scenario</h2>
 	  </section>
 	  <section>
@@ -304,7 +335,193 @@ workshop/auditing> terraform apply
 	    <h2>IAM</h2>
 	  </section>
 	  <section>
-	    <h2>TODO</h2>
+	    <h2>This is the foundation</h2>
+	  </section>
+	  <section>
+	    <h2>Locking down access is incredibly important</h2>
+	  </section>
+	  <section>
+	    <h2>In fact, users shouldn't actually have any permissions</h2>
+	  </section>
+	  <section>
+	    <h2>They should only be able to assume roles that provide the level of access they need</h2>
+	  </section>
+	  <section>
+	    <h2>This makes the console obsolete</h2>
+	  </section>
+	  <section>
+	    <h2>But it requires you to have a high degree of automation options</h2>
+	  </section>
+	  <section>
+	    <h2>If you do it right, people won't even know what cloud provider they are using</h2>
+	  </section>
+	  <section>
+	    <h2>Let's take a look at the setup</h2>
+	  </section>
+	  <section>
+	    <h4>First, create a list of users</h4>
+	    <pre>
+	      <code data-trim class="terraform">
+variable "read_only_users" {
+  type = "list"
+  description = "Read only users"
+  default = [ "abedra" ]
+}
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="terraform">
+variable "admin_users" {
+  type = "list"
+  description = "Admin Users"
+  default = [ "abedra" ]
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Next, we create some roles</h2>
+	  </section>
+	  <section>
+	    <h4>With these roles in place we need to have the ability to assume them</h4>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_iam_policy" "assume_read_only" {
+  name = "assume_read_only"
+  description = "Ability to assume the read_only role"
+  policy = &lt;&lt;EOF
+{
+  "Version": "2012-10-17",
+  "Statement": {
+    "Effect": "Allow",
+    "Action": "sts:AssumeRole",
+    "Resource": "${aws_iam_role.read_only.arn}"
+  }
+}
+EOF
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h4>Now we attach the policy to the role</h4>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_iam_policy_attachment" "read_only_attachment" {
+  name = "read_only_policy_attachment"
+  roles = ["${aws_iam_role.read_only.name}"]
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h4>Finally, we give users the ability to assume the role</h4>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_iam_policy_attachment" "assume_read_only" {
+  name = "assume_read_only_policy_attachment"
+  users = "${var.read_only_users}"
+  policy_arn = "${aws_iam_policy.assume_read_only.arn}"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Let's run terraform</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/iam> terraform init
+workshop/iam> terraform plan
+workshop/iam> terraform apply
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Log into the AWS console and explore the updates</h2>
+	  </section>
+	  <section>
+	    <h2>So how do we use these roles?</h2>
+	  </section>
+	  <section>
+	    <h2>We do it through STS</h2>
+	  </section>
+	  <section>
+	    <h2>TODO describe STS</h2>
+	  </section>
+	  <section>
+	    <h2>TODO talk about role assumption through STS</h2>
+	  </section>
+	  <section>
+	    <h2>But there's an easier way</h2>
+	  </section>
+	  <section>
+	    <h2>aws-vault</h2>
+	  </section>
+	  <section>
+	    <h2>This tool is effective on multiple levels</h2>
+	  </section>
+	  <section>
+	    <h2>It allows you to assume roles via STS</h2>
+	  </section>
+	  <section>
+	    <h2>It even handles MFA</h2>
+	  </section>
+	  <section>
+	    <h2>It also moves credentials into the OS keyring</h2>
+	  </section>
+	  <section>
+	    <h2>Which encrypts your credentials and keeps them protected</h2>
+	  </section>
+	  <section>
+	    <h2>Let's go through the setup</h2>
+	  </section>
+	  <section>
+	    <h2>TODO Install Instruction</h2>
+	  </section>
+	  <section>
+	    <h4>~/.aws/config</h4>
+	    <pre>
+	      <code data-trim class="config">
+[default]
+output = json
+region = us-east-1
+
+[profile personal-admin]
+region=us-east-1
+output=json
+role_arn=arn:aws:iam::489175270805:role/admin
+mfa_serial=arn:aws:iam::489175270805:mfa/abedra
+
+[profile personal-read_only]
+region=us-east-1
+output=json
+role_arn=arn:aws:iam::489175270805:role/read_only
+mfa_serial=arn:aws:iam::489175270805:mfa/abedra
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h4>Once you have a config, it's time to import into vault</h4>
+	    <pre>
+	      <code data-trim class="shell">
+TODO
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h4>Let's give it a spin</h4>
+	    <pre>
+	      <code data-trim class="shell">
+TODO
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Now that you have things setup you can remove all other permissions</h2>
+	  </section>
+	  <section>
+	    <h2>This creates a clean separation and a good audit trail</h2>
 	  </section>
 	</section>
 
@@ -313,7 +530,45 @@ workshop/auditing> terraform apply
 	    <h2>Network Design</h2>
 	  </section>
 	  <section>
-	    <h2>TODO</h2>
+	    <h2>Before we get started, the number on rule...</h2>
+	  </section>
+	  <section>
+	    <h2>Keep it simple</h2>
+	  </section>
+	  <section>
+	    <h2>Complicated networks are complicated</h2>
+	  </section>
+	  <section>
+	    <h2>And cause all kinds of problems</h2>
+	  </section>
+	  <section>
+	    <h2>Now that we have that out of the way</h2>
+	  </section>
+	  <section>
+	    <h2>Let's move on to the VPC</h2>
+	  </section>
+	  <section>
+	    <h2>This is the foundation of your network</h2>
+	  </section>
+	  <section>
+	    <h2>If you haven't been doing this, start now</h2>
+	  </section>
+	  <section>
+	    <h2>Start with the foundation</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_vpc" "workshop" {
+    cidr_block = "10.1.0.0/16"
+
+    tags {
+        Name = "main"
+    }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2></h2>
 	  </section>
 	</section>
 

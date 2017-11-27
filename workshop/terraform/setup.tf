@@ -1,9 +1,9 @@
 provider "aws" {
-    region = "us-east-2"
+    region = "ap-southeast-2"
 }
 
-resource "aws_s3_bucket" "abedra-workshop-tfstate" {
-    bucket = "abedra-workshop-tfstate"
+resource "aws_s3_bucket" "abedra-yow-tfstate" {
+    bucket = "abedra-yow-tfstate"
     acl = "private"
     versioning {
         enabled  = true
@@ -12,8 +12,8 @@ resource "aws_s3_bucket" "abedra-workshop-tfstate" {
 
 # terraform {
 #     backend "s3" {
-#         bucket = "abedra-workshop-tfstate"
+#         bucket = "abedra-yow-tfstate"
 #         key = "setup/terraform.tfstate"
-#         region = "us-east-2"
+#         region = "ap-southeast-2"
 #     }
 # }
