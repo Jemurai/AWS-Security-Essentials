@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+"""This script imports profiles into aws-vault"""
+
+import os
+import subprocess
+import json
+import getpass
+import boto3
+
+
+def read_config():
+    """Reads and parses the config file"""
+    with open("config.json") as config_file:
+        return json.load(config_file)
+
+
+def create_iam_client():
+    """Creates an iam client object"""
+    resource = boto3.resource('iam')
+    return resource.meta.client
+
+
+def create_config_directory():
+    """Creates the aws configuration directory if it doesn't already exist"""
+    if not os.path.exists(os.path.expanduser("~/.aws")):
+        os.makedirs(os.path.expanduser("~/.aws"))
+
+
+def get_mfa_serial(client):
+    """Obtains the MFA serial number"""
+    devices = client.list_mfa_devices(UserName=getpass.getuser())
+    return devices["MFADevices"][0]["SerialNumber"]
+
+
+def get_account_id():
+    """Gets the AWS account id"""
+    return boto3.client('sts').get_caller_identity().get('Account')
+
+
+def add_vault(name, access_key_id, secret_key):
+    """Add an entry into vault"""
+    write_expect_script(name, access_key_id, secret_key)
+    subprocess.call(["expect", "/tmp/temp.exp"])
+
+
+def write_expect_script(name, access_key_id, secret_access_key):
+    """Writes the expect script to a temp file"""
+    script = """spawn aws-vault add %s
+
+expect "Enter Access Key ID: " { send "%s\\n" }
+expect "Enter Secret Access Key: " { send "%s\\n" }
+
+interact""" % (name, access_key_id, secret_access_key)
+
+    f = open("/tmp/temp.exp", "w+")
+    f.write(script)
+    f.close()
+
+
+def remove_expect_script():
+    """Deletes the temporary expect script"""
+    os.remove("/tmp/temp.exp")
+
+
+def write_config(data):
+    """Writes the config file"""
+    create_config_directory()
+
+    f = open(os.path.expanduser("~/.aws/config"), "w+")
+    f.write(data)
+    f.close()
+
+
+def backup_config():
+    """Creates a backup of the current config file"""
+    if os.path.exists(os.path.expanduser("~/.aws")) and os.path.exists(os.path.expanduser("~/.aws/config")):
+        os.rename(os.path.expanduser("~/.aws/config"),
+                  os.path.expanduser("~/.aws/config.backup"))
+
+
+def main():
+    """Main"""
+    config = read_config()
+    iam = create_iam_client()
+    mfa_serial = get_mfa_serial(iam)
+
+    access_key_id = raw_input("Access Key ID: ")
+    secret_key = raw_input("Secret Access Key: ")
+
+    data = []
+
+    for environment in config["environments"]:
+        for role in config["roles"]:
+            add_vault("%s-%s" %
+                      (environment["name"], role), access_key_id, secret_key)
+            data.append("[profile %s-%s]" % (environment["name"], role))
+            data.append("region=%s" % environment["region"])
+            data.append("output=%s" % environment["output"])
+            data.append("role_arn=arn:aws:iam::%s:role/%s" %
+                        (get_account_id(), role))
+            data.append("mfa_serial=%s\n" % mfa_serial)
+
+    backup_config()
+    write_config('\n'.join(data))
+    remove_expect_script()
+
+
+if __name__ == '__main__':
+    main()

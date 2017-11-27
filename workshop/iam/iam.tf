@@ -1,5 +1,13 @@
 provider "aws" {
-  region = "us-east-2"
+  region = "ap-southeast-2"
+}
+
+terraform {
+    backend "s3" {
+        bucket = "abedra-yow-tfstate"
+        key = "iam/terraform.tfstate"
+        region = "ap-southeast-2"
+    }
 }
 
 variable "read_only_users" {

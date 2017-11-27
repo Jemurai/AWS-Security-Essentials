@@ -349,7 +349,7 @@ workshop/auditing> terraform apply
 	    <h2>Locking down access is incredibly important</h2>
 	  </section>
 	  <section>
-	    <h2>In fact, users shouldn't actually have any permissions</h2>
+	    <h2>In fact, users shouldn't have any permissions</h2>
 	  </section>
 	  <section>
 	    <h2>They should only be able to assume roles that provide the level of access they need</h2>
@@ -358,16 +358,16 @@ workshop/auditing> terraform apply
 	    <h2>This makes the console obsolete</h2>
 	  </section>
 	  <section>
-	    <h2>But it requires you to have a high degree of automation options</h2>
+	    <h2>But it requires you to have a high degree of automation</h2>
 	  </section>
 	  <section>
-	    <h2>If you do it right, people won't even know what cloud provider they are using</h2>
+	    <h2>If you do it right, people won't care what cloud provider they are using</h2>
 	  </section>
 	  <section>
 	    <h2>Let's take a look at the setup</h2>
 	  </section>
 	  <section>
-	    <h4>First, create a list of users</h4>
+	    <h2>First, create a list of users</h2>
 	    <pre>
 	      <code data-trim class="terraform">
 variable "read_only_users" {
@@ -389,9 +389,22 @@ variable "admin_users" {
 	  </section>
 	  <section>
 	    <h2>Next, we create some roles</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_iam_role" "read_only" {
+  name = "read_only"
+  description = "ReadOnly Access"
+  assume_role_policy = &lt;&lt;EOF
+{
+...SNIP...
+}
+EOF
+}
+	      </code>
+	    </pre>
 	  </section>
 	  <section>
-	    <h4>With these roles in place we need to have the ability to assume them</h4>
+	    <h2>With these roles in place we create the ability to assume them</h2>
 	    <pre>
 	      <code data-trim class="terraform">
 resource "aws_iam_policy" "assume_read_only" {
@@ -412,7 +425,7 @@ EOF
 	    </pre>
 	  </section>
 	  <section>
-	    <h4>Now we attach the policy to the role</h4>
+	    <h2>Now we attach the policy to the role</h2>
 	    <pre>
 	      <code data-trim class="terraform">
 resource "aws_iam_policy_attachment" "read_only_attachment" {
@@ -424,7 +437,7 @@ resource "aws_iam_policy_attachment" "read_only_attachment" {
 	    </pre>
 	  </section>
 	  <section>
-	    <h4>Finally, we give users the ability to assume the role</h4>
+	    <h2>Finally, we give users the ability to assume the role</h2>
 	    <pre>
 	      <code data-trim class="terraform">
 resource "aws_iam_policy_attachment" "assume_read_only" {
@@ -455,10 +468,10 @@ workshop/iam> terraform apply
 	    <h2>We do it through STS</h2>
 	  </section>
 	  <section>
-	    <h2>TODO describe STS</h2>
+	    <h2>Security Token Service provides temporary, limited credentials</h2>
 	  </section>
 	  <section>
-	    <h2>TODO talk about role assumption through STS</h2>
+	    <h2>Users use their AWS credentials to get STS tokens that are used to make API calls</h2>
 	  </section>
 	  <section>
 	    <h2>But there's an easier way</h2>
@@ -485,7 +498,7 @@ workshop/iam> terraform apply
 	    <h2>Let's go through the setup</h2>
 	  </section>
 	  <section>
-	    <h2>TODO Install Instruction</h2>
+	    <h2>https://github.com/99designs/aws-vault</h2>
 	  </section>
 	  <section>
 	    <h4>~/.aws/config</h4>
@@ -493,16 +506,16 @@ workshop/iam> terraform apply
 	      <code data-trim class="config">
 [default]
 output = json
-region = us-east-1
+region = ap-southeast-2
 
 [profile personal-admin]
-region=us-east-1
+region=ap-southeast-2
 output=json
 role_arn=arn:aws:iam::489175270805:role/admin
 mfa_serial=arn:aws:iam::489175270805:mfa/abedra
 
 [profile personal-read_only]
-region=us-east-1
+region=ap-southeast-2
 output=json
 role_arn=arn:aws:iam::489175270805:role/read_only
 mfa_serial=arn:aws:iam::489175270805:mfa/abedra
@@ -510,18 +523,35 @@ mfa_serial=arn:aws:iam::489175270805:mfa/abedra
 	    </pre>
 	  </section>
 	  <section>
-	    <h4>Once you have a config, it's time to import into vault</h4>
+	    <h2>Now we import our credentials into vault</h2>
 	    <pre>
 	      <code data-trim class="shell">
-TODO
+workshop/iam> aws-vault add personal-read_only
+Enter Access Key ID: XXX
+Enter Secret Access Key: XXX
+Added credentials to profile "personal-read_only" in vault
+workshop/iam> aws-vault add personal-admin
+Enter Access Key ID: XXX
+Enter Secret Access Key: XXX
+Added credentials to profile "personal-admin" in vault
+workshop/iam> aws-vault list
+personal-read_only
+personal-admin
 	      </code>
 	    </pre>
 	  </section>
 	  <section>
-	    <h4>Let's give it a spin</h4>
+	    <h2>Let's give it a spin</h2>
 	    <pre>
 	      <code data-trim class="shell">
-TODO
+workshop/iam> aws-vault exec personal-read_only -- aws s3 ls
+2017-09-01 01:23:14 abedra-personal-tfstate
+2017-11-25 09:06:31 abedra-workshop-audit
+2017-11-25 08:36:28 abedra-workshop-tfstate
+2017-11-27 14:46:13 abedra-yow-audit
+2017-11-27 11:30:31 abedra-yow-tfstate
+2017-08-04 12:45:53 aws-vault-test-1
+2017-08-18 04:50:25 aws-vault-test-2
 	      </code>
 	    </pre>
 	  </section>
@@ -530,6 +560,9 @@ TODO
 	  </section>
 	  <section>
 	    <h2>This creates a clean separation and a good audit trail</h2>
+	  </section>
+	  <section>
+	    <h2>Questions?</h2>
 	  </section>
 	</section>
 

@@ -1,0 +1,10 @@
+{
+    "roles" : ["admin","read_only"],
+    "environments": [
+      {
+        "name": "personal",
+        "region": "us-east-1",
+        "output": "json"
+      }
+    ]
+  }
