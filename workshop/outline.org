@@ -1,18 +1,42 @@
 * DONE Agenda
   CLOSED: [2017-11-24 Fri 15:09]
-* INPROGRESS Introduction
-* INPROGRESS Automation with Terraform
-* INPROGRESS IAM
-* INPROGRESS Credential Management
-* INPROGRESS Network Design [0/3]
-** TODO Update AWS region to Australia
-** TODO Run examples and capture output
+* INPROGRESS Introduction [0/1]
 ** TODO Slides
-* INPROGRESS KMS [0/2]
+* DONE Automation with Terraform
+  CLOSED: [2017-11-26 Sun 09:19]
+* DONE Auditing [3/3]
+  CLOSED: [2017-11-27 Mon 14:46]
+** DONE Update AWS region to Australia
+   CLOSED: [2017-11-27 Mon 14:44]
+** DONE Run examples and capture output
+   CLOSED: [2017-11-27 Mon 14:46]
+** DONE Get a more detailed set of information about what cloudtrail tracks
+   CLOSED: [2017-11-27 Mon 14:44]
+* DONE IAM [3/3]
+  CLOSED: [2017-11-27 Mon 15:46]
+** DONE Content
+   CLOSED: [2017-11-27 Mon 15:46]
+** DONE Update AWS region to Australia
+   CLOSED: [2017-11-27 Mon 15:46]
+** DONE Run examples and capture output
+   CLOSED: [2017-11-27 Mon 15:46]
+* DONE Credential Management [2/2]
+  CLOSED: [2017-11-27 Mon 15:47]
+** DONE Content
+   CLOSED: [2017-11-27 Mon 15:46]
+** DONE Run examples and capture output
+   CLOSED: [2017-11-27 Mon 15:47]
+* INPROGRESS Network Design [0/4]
 ** TODO Update AWS region to Australia
 ** TODO Run examples and capture output
-* INPROGRESS Auditing [0/3]
-** TODO Update AWS region to Australia
-** TODO Run examples and capture output
-** TODO Get a more detailed set of information about what cloudtrail tracks
-* TODO Continuous Integration
+** TODO Finish terraform scripts
+** TODO Slides
+* DONE KMS [2/2]
+  CLOSED: [2017-11-27 Mon 16:34]
+** DONE Update AWS region to Australia
+   CLOSED: [2017-11-27 Mon 16:34]
+** DONE Run examples and capture output
+   CLOSED: [2017-11-27 Mon 16:34]
+* TODO Continuous Integration [0/2]
+** TODO Content
+** TODO Capture output

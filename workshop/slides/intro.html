@@ -666,7 +666,7 @@ def decrypt(key, nonce, tag, ciphertext):
 	    </pre>
 	  </section>
 	  <section>
-	    <h4>Usage</h4>
+	    <h2>Usage</h2>
 	    <pre>
 	      <code data-trim class="python">
 def main():
@@ -680,7 +680,8 @@ def main():
 	    </pre>
 	    <pre>
 	      <code data-trim class="shell">
-workshop/kms> ./isolated_aes
+workshop/kms/local> docker build -t local_aes .
+workshop/kms/local> docker run local_aes
 'Attack at dawn'
 	      </code>
 	    </pre>
@@ -737,29 +738,33 @@ workshop/kms> terraform apply
 	  </section>
 	  <section>
 	    <h2>Let's start with our KMS master key</h2>
-	  </section>
-	  <section>
 	    <pre>
 	      <code data-trim class="python">
 def main():
     kms = boto3.client('kms')
     keys = kms.list_keys()
-
     cipher_text = kms.encrypt(
         KeyId=keys['Keys'][0]['KeyId'],
         Plaintext="Attack at dawn"
     )
-
     plain_text = kms.decrypt(
         CiphertextBlob=cipher_text['CiphertextBlob']
     )
-
     pprint.pprint(plain_text['Plaintext'])
 	      </code>
 	    </pre>
+	  </section>
+	  <section>
+	    <h2>Build and run</h2>
 	    <pre>
 	      <code data-trim class="shell">
-workshop/kms> ./kms_master_test
+workshop/kms/kms_master> docker build -t kms_master .
+workshop/kms/kms_master> docker run  \
+-e AWS_ACCESS_KEY_ID=XXX             \
+-e AWS_SECRET_ACCESS_KEY=XXX         \
+-e AWS_DEFAULT_REGION=ap-southeast-2 \
+kms_master
+
 'Attack at dawn'
 	      </code>
 	    </pre>
@@ -780,9 +785,7 @@ workshop/kms> ./kms_master_test
 	    <h2>We store our encrypted data encryption keys in dynamodb</h2>
 	  </section>
 	  <section>
-	    <h2>Let's generate a DEK and insert it into dynamodb</h2>
-	  </section>
-	  <section>
+	    <h2>Generate a DEK and insert it into dynamodb</h2>
 	    <pre>
 	      <code data-trim class="python">
 def main():
@@ -803,10 +806,22 @@ def main():
 	    </pre>
 	  </section>
 	  <section>
+	    <h2>Build and run</h2>
 	    <pre>
 	      <code data-trim class="shell">
-workshop/kms> ./insert_dek
-TODO
+workshop/kms/dynamo> docker build -t insert_dek .
+workshop/kms/dynamo> docker run      \
+-e AWS_ACCESS_KEY_ID=XXX             \
+-e AWS_SECRET_ACCESS_KEY=XXX         \
+-e AWS_DEFAULT_REGION=ap-southeast-2 \
+insert_dek
+
+{u'Item': {u'KeyId': {u'S': u'application'},
+           u'Value': {u'S': u'XXX'}},
+ 'ResponseMetadata': {'HTTPHeaders': { ...SNIP... }
+                      'HTTPStatusCode': 200,
+                      'RequestId': XXX,
+                      'RetryAttempts': 0}}
 	      </code>
 	    </pre>
 	  </section>
@@ -814,7 +829,7 @@ TODO
 	    <h2>Let's do an end to end encryption operation using our dynamodb and kms backed encryption keys</h2>
 	  </section>
 	  <section>
-	    <h4>Fetch and decrypt DEK</h4>
+	    <h2>Fetch and decrypt DEK</h2>
 	    <pre>
 	      <code data-trim class="python">
 def fetch_encryption_key():
@@ -849,7 +864,13 @@ def main():
 	    </pre>
 	    <pre>
 	      <code data-trim class="shell">
-workshop/kms> ./dynamo_backed_aes
+workshop/kms/complete> docker build -t complete .
+workshop/kms/complete> docker run    \
+-e AWS_ACCESS_KEY_ID=XXX             \
+-e AWS_SECRET_ACCESS_KEY=XXX         \
+-e AWS_DEFAULT_REGION=ap-southeast-2 \
+complete
+
 'Attack at dawn'
 	      </code>
 	    </pre>
@@ -878,12 +899,7 @@ workshop/kms> ./dynamo_backed_aes
 	    </ul>
 	  </section>
 	  <section>
-	    <h2>Clean Up</h2>
-	    <pre>
-	      <code data-trim class="shell">
-workshop/kms> terraform destroy
-	      </code>
-	    </pre>
+	    <h2>Questions?</h2>
 	  </section>
 	</section>
 

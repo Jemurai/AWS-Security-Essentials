@@ -27,7 +27,7 @@ def fetch_encryption_key():
     dynamo = boto3.client('dynamodb')
 
     encrypted_key = dynamo.get_item(
-        TableName='data_encryption_keys',
+        TableName='yow_encryption_keys',
         Key={
             'KeyId': {
                 'S': "application"

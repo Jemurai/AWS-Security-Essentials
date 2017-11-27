@@ -18,7 +18,7 @@ def main():
 
     dynamo = boto3.client('dynamodb')
     dynamo.put_item(
-        TableName='data_encryption_keys',
+        TableName='yow_encryption_keys',
         Item={
             'KeyId': {
                 'S': "application",
@@ -30,7 +30,7 @@ def main():
     )
 
     encrypted_key = dynamo.get_item(
-        TableName='data_encryption_keys',
+        TableName='yow_encryption_keys',
         Key={
             'KeyId': {
                 'S': "application"

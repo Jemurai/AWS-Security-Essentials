@@ -1,0 +1,2 @@
+pycryptodome
+boto3
