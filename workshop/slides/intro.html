@@ -191,13 +191,21 @@ workshop/terraform> terraform init
 	    <h2>Let's ask!</h2>
 	    <pre>
 	      <code data-trim class="python">
-workshop/auditing> ./mfa_audit
+workshop/auditing/mfa> docker build -t mfa_audit .
+workshop/auditing/mfa> docker run \
+-e AWS_ACCESS_KEY_ID=XXX          \
+-e AWS_SECRET_ACCESS_KEY=xxx      \
+mfa_audit
 []
 	      </code>
 	    </pre>
 	    <pre>
 	      <code data-trim class="python">
-workshop/auditing> ./inactive_user_audit
+workshop/auditing/mfa> docker build -t inactive_user_audit .
+workshop/auditing/mfa> docker run \
+-e AWS_ACCESS_KEY_ID=XXX          \
+-e AWS_SECRET_ACCESS_KEY=xxx      \
+inactive_user_audit
 []
 	      </code>
 	    </pre>
