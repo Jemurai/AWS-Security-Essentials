@@ -1,49 +1,1069 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+    <title>AWS Security Essentials</title>
 
-		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/solarized.css">
 
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/zenburn.css">
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
 
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+	<section>
+	  <h2>AWS Security Essentials</h2>
+	  <p>
+	    <small>
+	      Aaron Bedra <a href="https://twitter.com/abedra">@abedra</a>
+	      <br />Chief Scientist, Jemurai
+	    </small>
+	  </p>
+	</section>
 
-		<script src="lib/js/head.min.js"></script>
-		<script src="js/reveal.js"></script>
+	<section>
+	  <h2>Agenda</h2>
+	  <ul>
+	    <li>Setup</li>
+	    <li>Introduction</li>
+	    <li>Terraform</li>
+	    <li>Auditing</li>
+	    <li>IAM</li>
+	    <li>Network Design</li>
+	    <li>Encryption and Key Management</li>
+	    <li>Wrap Up</li>
+	  </ul>
+	</section>
 
-		<script>
-			// More info about config & dependencies:
-			// - https://github.com/hakimel/reveal.js#configuration
-			// - https://github.com/hakimel/reveal.js#dependencies
-			Reveal.initialize({
-				dependencies: [
-					{ src: 'plugin/markdown/marked.js' },
-					{ src: 'plugin/markdown/markdown.js' },
-					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-				]
-			});
-		</script>
-	</body>
+	<section>
+	  <section>
+	    <h2>Setup</h2>
+	  </section>
+	  <section>
+	    <h2>Checklist</h2>
+	    <ul>
+	      <li>A clone of this repository</li>
+	      <li>Docker</li>
+	      <li>Terraform</li>
+	      <li>An AWS account with full administrative permissions</li>
+	      <li>A working internet connection</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>Please correct any of these issues during the introduction talk</h2>
+	  </section>
+	</section>
+
+	<section>
+	  <h2>Introduction Talk</h2>
+	</section>
+
+	<section>
+	  <section>
+	    <h2>Terraform</h2>
+	  </section>
+	  <section>
+	    <h2>Infrastructure Automation</h2>
+	  </section>
+	  <section>
+	    <h2>As noted in the intro talk, this is an important first step</h2>
+	  </section>
+	  <section>
+	    <h2>We will be using terraform throughout the workshop to setup our AWS resources</h2>
+	  </section>
+	  <section>
+	    <h2>There are other automation options</h2>
+	  </section>
+	  <section>
+	    <h2>To save time please use the terraform code provided</h2>
+	  </section>
+	  <section>
+	    <h2>Feel free to translate this code to any other tool of your choice</h2>
+	  </section>
+	  <section>
+	    <h2>And don't hesitate to ask any questions</h2>
+	  </section>
+	  <section>
+	    <h2>Our initial script</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+provider "aws" {
+    region = "ap-southeast-2"
+}
+
+resource "aws_s3_bucket" "abedra-yow-tfstate" {
+    bucket = "abedra-yow-tfstate"
+    acl = "private"
+    versioning {
+        enabled  = true
+    }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>This script creates a single S3 bucket</h2>
+	  </section>
+	  <section>
+	    <p>Open the <em>workshop/terraform/setup.tf</em> file and change the name of the bucket to your desired name</p>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/terraform> terraform init
+workshop/terraform> terraform plan
+workshop/terraform> terraform apply
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Throughout the workshop we will use this bucket to store our terraform state</h2>
+	  </section>
+	  <section>
+	    <h2>Let's update our script to point terraform to our new bucket</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+terraform {
+    backend "s3" {
+        bucket = "abedra-yow-tfstate"
+        key = "setup/terraform.tfstate"
+        region = "ap-southeast-2"
+    }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Doing this requires us to reinitialize terraform</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/terraform> terraform init
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>After initialization our terraform state fill will be in the designated bucket</h2>
+	  </section>
+	  <section>
+	    <h2>Check the buket in your AWS console to make sure this worked properly</h2>
+	  </section>
+	  <section>
+	    <h2>You don't have to store your tfstate in S3 during this workshop</h2>
+	  </section>
+	  <section>
+	    <h2>But if you are working with others in the same account it is recommended</h2>
+	  </section>
+	  <section>
+	    <h2>Questions?</h2>
+	  </section>
+	</section>
+
+	<section>
+	  <section>
+	    <h2>Auditing</h2>
+	  </section>
+	  <section>
+	    <h2>How do we know our AWS configuration doesn't have security issues?</h2>
+	  </section>
+	  <section>
+	    <h2>Questions</h2>
+	    <ul>
+	      <li>Do all our users have MFA enabled?</li>
+	      <li>Do we have inactive users?</li>
+	      <li>Do we have security groups that expose too much?</li>
+	      <li>Do we have S3 buckets with improper access control?</li>
+	      <li>How do we know that our users aren't abusing their permissions?</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>Let's ask!</h2>
+	    <pre>
+	      <code data-trim class="python">
+workshop/auditing/mfa> docker build -t mfa_audit .
+workshop/auditing/mfa> docker run \
+-e AWS_ACCESS_KEY_ID=XXX          \
+-e AWS_SECRET_ACCESS_KEY=xxx      \
+mfa_audit
+[]
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="python">
+workshop/auditing/mfa> docker build -t inactive_user_audit .
+workshop/auditing/mfa> docker run \
+-e AWS_ACCESS_KEY_ID=XXX          \
+-e AWS_SECRET_ACCESS_KEY=xxx      \
+inactive_user_audit
+[]
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>We could go on all day with one off scripts</h2>
+	  </section>
+	  <section>
+	    <h2>Let's try something a little more effective</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/auditing> docker build -t audit .
+workshop/auditing> docker run \
+-e AWS_ACCESS_KEY_ID=XXX      \
+-e AWS_SECRET_ACCESS_KEY=xxx  \
+audit
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Results</h2>
+	    <pre>
+	      <code data-trim class="shell">
+Creating scout2-report/report.html ...
+[iam] Root account used recently : 1
+[iam] Minimum password length too short : 1
+[iam] Password expiration disabled : 1
+[cloudtrail] Not configured : 13
+[cloudtrail] Log file validation disabled : 1
+[ec2] SSH port open to all : 1
+[vpc] Subnet with allow all egress NACLs : 32
+[vpc] Subnet with allow all ingress NACLs : 32
+Scout2 danger issues identified. Please correct the issues
+listed above. See scout2-report/report.html for more details
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>What we just ran is called Scout2</h2>
+	  </section>
+	  <section>
+	    <h2>Full Walkthrough</h2>
+	  </section>
+	  <section>
+	    <h2>There is also commercial tooling, but this is a great way to demonstrate ability</h2>
+	  </section>
+	  <section>
+	    <h2>Exercise: Fix the issues</h2>
+	  </section>
+	  <section>
+	    <h2>Pick and choose your battles, not everything you find is an emergency</h2>
+	  </section>
+	  <section>
+	    <h2>This gets us configuration auditing, but what about user activity?</h2>
+	  </section>
+	  <section>
+	    <h2>Cloudtrail</h2>
+	  </section>
+	  <section>
+	    <h2>Cloudtrail logs all activity to the AWS API</h2>
+	  </section>
+	  <section>
+	    <h2>These logs provide actionable data that you can use to automate security response</h2>
+	  </section>
+	  <section>
+	    <h2>You can even feed Cloudtrail logs into a SIEM</h2>
+	  </section>
+	  <section>
+	    <h2>Setup</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/auditing> terraform init
+workshop/auditing> terraform plan
+workshop/auditing> terraform apply
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>You just enabled Cloudtrail and created an S3 bucket to store the logs</h2>
+	  </section>
+	  <section>
+	    <h2>Navigate to the S3 bucket in the AWS console</h2>
+	  </section>
+	  <section>
+	    <h2>Check back throughout the day to see what ends up there</h2>
+	  </section>
+	  <section>
+	    <pre>
+	      <code data-trim class="json">
+{
+  "eventVersion":"1.02","userIdentity": {
+    "type":"Root",
+    "principalId":"489175270805",
+    "arn":"arn:aws:iam::489175270805:root",
+    "accountId":"489175270805",
+    "accessKeyId":"ASIAIYHVC5VYM22SHTXQ",
+  },
+  "eventTime":"2017-11-24T22:12:51Z",
+  "eventName":"GetAccountPasswordPolicy",
+  "sourceIPAddress":"199.27.255.43",
+  "requestID":"9c81b384-d164-11e7-b896-bb38c46dd0a0",
+  "eventID":"35ba2cdd-7b76-40bc-aeca-3b7283518bae",
+  "eventType":"AwsApiCall","recipientAccountId":"489175270805"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Let's walk through a real world scenario</h2>
+	  </section>
+	  <section>
+	    <h4>https://aws.amazon.com/blogs/security/how-to-receive-notifications-when-your-aws-accounts-root-access-keys-are-used/</h4>
+	  </section>
+	  <section>
+	    <h2>Setting up alarms like this can be a key differentiator in detecting and understanding a breach</h2>
+	  </section>
+	  <section>
+	    <h2>Other Alarm Possibilities</h2>
+	    <ul>
+	      <li>Unusually high amout of KMS actions</li>
+	      <li>New user created</li>
+	      <li>Access keys created for the root account</li>
+	      <li>Access keys used for the root account</li>
+	      <li>Anyone logs into the AWS console</li>
+	      <li>Anything that would signal unexpected behavior</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>Questions?</h2>
+	  </section>
+	</section>
+
+	<section>
+	  <section>
+	    <h2>IAM</h2>
+	  </section>
+	  <section>
+	    <h2>This is the foundation</h2>
+	  </section>
+	  <section>
+	    <h2>Locking down access is incredibly important</h2>
+	  </section>
+	  <section>
+	    <h2>In fact, users shouldn't have any permissions</h2>
+	  </section>
+	  <section>
+	    <h2>They should only be able to assume roles that provide the level of access they need</h2>
+	  </section>
+	  <section>
+	    <h2>This makes the console obsolete</h2>
+	  </section>
+	  <section>
+	    <h2>But it requires you to have a high degree of automation</h2>
+	  </section>
+	  <section>
+	    <h2>If you do it right, people won't care what cloud provider they are using</h2>
+	  </section>
+	  <section>
+	    <h2>Let's take a look at the setup</h2>
+	  </section>
+	  <section>
+	    <h2>First, create a list of users</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+variable "read_only_users" {
+  type = "list"
+  description = "Read only users"
+  default = [ "abedra" ]
+}
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="terraform">
+variable "admin_users" {
+  type = "list"
+  description = "Admin Users"
+  default = [ "abedra" ]
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Next, we create some roles</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_iam_role" "read_only" {
+  name = "read_only"
+  description = "ReadOnly Access"
+  assume_role_policy = &lt;&lt;EOF
+{
+...SNIP...
+}
+EOF
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>With these roles in place we create the ability to assume them</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_iam_policy" "assume_read_only" {
+  name = "assume_read_only"
+  description = "Ability to assume the read_only role"
+  policy = &lt;&lt;EOF
+{
+  "Version": "2012-10-17",
+  "Statement": {
+    "Effect": "Allow",
+    "Action": "sts:AssumeRole",
+    "Resource": "${aws_iam_role.read_only.arn}"
+  }
+}
+EOF
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Now we attach the policy to the role</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_iam_policy_attachment" "read_only_attachment" {
+  name = "read_only_policy_attachment"
+  roles = ["${aws_iam_role.read_only.name}"]
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Finally, we give users the ability to assume the role</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_iam_policy_attachment" "assume_read_only" {
+  name = "assume_read_only_policy_attachment"
+  users = "${var.read_only_users}"
+  policy_arn = "${aws_iam_policy.assume_read_only.arn}"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Let's run terraform</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/iam> terraform init
+workshop/iam> terraform plan
+workshop/iam> terraform apply
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Log into the AWS console and explore the updates</h2>
+	  </section>
+	  <section>
+	    <h2>So how do we use these roles?</h2>
+	  </section>
+	  <section>
+	    <h2>We do it through STS</h2>
+	  </section>
+	  <section>
+	    <h2>Security Token Service provides temporary, limited credentials</h2>
+	  </section>
+	  <section>
+	    <h2>Users use their AWS credentials to get STS tokens that are used to make API calls</h2>
+	  </section>
+	  <section>
+	    <h2>But there's an easier way</h2>
+	  </section>
+	  <section>
+	    <h2>aws-vault</h2>
+	  </section>
+	  <section>
+	    <h2>This tool is effective on multiple levels</h2>
+	  </section>
+	  <section>
+	    <h2>It allows you to assume roles via STS</h2>
+	  </section>
+	  <section>
+	    <h2>It even handles MFA</h2>
+	  </section>
+	  <section>
+	    <h2>It also moves credentials into the OS keyring</h2>
+	  </section>
+	  <section>
+	    <h2>Which encrypts your credentials and keeps them protected</h2>
+	  </section>
+	  <section>
+	    <h2>Let's go through the setup</h2>
+	  </section>
+	  <section>
+	    <h2>https://github.com/99designs/aws-vault</h2>
+	  </section>
+	  <section>
+	    <h4>~/.aws/config</h4>
+	    <pre>
+	      <code data-trim class="config">
+[default]
+output = json
+region = ap-southeast-2
+
+[profile personal-admin]
+region=ap-southeast-2
+output=json
+role_arn=arn:aws:iam::489175270805:role/admin
+mfa_serial=arn:aws:iam::489175270805:mfa/abedra
+
+[profile personal-read_only]
+region=ap-southeast-2
+output=json
+role_arn=arn:aws:iam::489175270805:role/read_only
+mfa_serial=arn:aws:iam::489175270805:mfa/abedra
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Now we import our credentials into vault</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/iam> aws-vault add personal-read_only
+Enter Access Key ID: XXX
+Enter Secret Access Key: XXX
+Added credentials to profile "personal-read_only" in vault
+workshop/iam> aws-vault add personal-admin
+Enter Access Key ID: XXX
+Enter Secret Access Key: XXX
+Added credentials to profile "personal-admin" in vault
+workshop/iam> aws-vault list
+personal-read_only
+personal-admin
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Let's give it a spin</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/iam> aws-vault exec personal-read_only -- aws s3 ls
+2017-09-01 01:23:14 abedra-personal-tfstate
+2017-11-25 09:06:31 abedra-workshop-audit
+2017-11-25 08:36:28 abedra-workshop-tfstate
+2017-11-27 14:46:13 abedra-yow-audit
+2017-11-27 11:30:31 abedra-yow-tfstate
+2017-08-04 12:45:53 aws-vault-test-1
+2017-08-18 04:50:25 aws-vault-test-2
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Now that you have things setup you can remove all other permissions</h2>
+	  </section>
+	  <section>
+	    <h2>This creates a clean separation and a good audit trail</h2>
+	  </section>
+	  <section>
+	    <h2>Questions?</h2>
+	  </section>
+	</section>
+
+	<section>
+	  <section>
+	    <h2>Network Design</h2>
+	  </section>
+	  <section>
+	    <h2>Before we get started, the number one rule...</h2>
+	  </section>
+	  <section>
+	    <h2>Keep it simple</h2>
+	  </section>
+	  <section>
+	    <h2>Complicated networks are complicated</h2>
+	  </section>
+	  <section>
+	    <h2>And cause all kinds of problems</h2>
+	  </section>
+	  <section>
+	    <h2>Now that we have that out of the way</h2>
+	  </section>
+	  <section>
+	    <h2>Let's move on to the VPC</h2>
+	  </section>
+	  <section>
+	    <h2>This is the foundation of your network</h2>
+	  </section>
+	  <section>
+	    <h2>If you haven't been doing this, start now</h2>
+	  </section>
+	  <section>
+	    <h2>Start with the foundation</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_vpc" "yow" {
+    cidr_block = "10.1.0.0/16"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Add a subnet</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_subnet" "yow_subnet" {
+    vpc_id = "${aws_vpc.yow.id}"
+    cidr_block = "10.1.0.0/24"
+    availability_zone = "ap-southeast-2a"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>This is the internal mapping for our environment</h2>
+	  </section>
+	  <section>
+	    <h2>Anything we create from here should be attached to the vpc</h2>
+	  </section>
+	  <section>
+	    <h2>Let's create a security group for external SSH access</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_security_group" "bastion_external" {
+    name = "bastion_external_security_group"
+    description = "Allowed external ports for bastion hosts"
+    vpc_id = "${aws_vpc.yow.id}"
+
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Any rule open to 0.0.0.0/0 should be carefully considered</h2>
+	  </section>
+	  <section>
+	    <h2>Notice we named our rule bastion to indicate that it should be used for SSH bastion hosts only</h2>
+	  </section>
+	  <section>
+	    <h2>External SSH access should be disabled for all but basion hosts</h2>
+	  </section>
+	  <section>
+	    <h2>The only exception would be if you had a VPN etablished</h2>
+	  </section>
+	  <section>
+	    <h2>With a VPN you would only allow SSH access to IPs in the VPC</h2>
+	  </section>
+	  <section>
+	    <h2>Let's create an internal SSH rule</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_security_group" "internal_ssh" {
+    name = "bastion_internal_security_group"
+    description = "Allow SSH via internal instances"
+    vpc_id = "${aws_vpc.yow.id}"
+
+    ingress {
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["10.1.0.0/16"]
+    }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>And a bastion host</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_instance" "bastion" {
+    ami = "ami-ccecf5af"
+    instance_type = "t2.micro"
+    associate_public_ip_address = true
+    vpc_security_group_ids = [
+      "${aws_security_group.bastion_external.id}"
+    ]
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Check the console to see inbound rules</h2>
+	  </section>
+	  <section>
+	    <h2>Or use the nmap docker image</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/vpc> docker build -t nmap .
+workshop/vpc> docker run nmap -Pn -T5 -sS -A [bastion_ip]
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Now let's add an inbound web security group</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_security_group" "api_security_group" {
+    name = "api_security_group"
+    description = "Allowed inbound ports for api"
+    vpc_id = "${aws_vpc.yow.id}"
+
+    ingress {
+        from_port = 80
+        to_port = 80
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>And a web instance</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_instance" "api" {
+    ami = "ami-ccecf5af"
+    instance_type = "t2.micro"
+    associate_public_ip_address = true
+    subnet_id = "${aws_subnet.yow_subnet.id}"
+    vpc_security_group_ids = [
+        "${aws_security_group.api_security_group.id}",
+        "${aws_security_group.internal_ssh.id}"
+    ]
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Again, check the console to see inbound rules</h2>
+	  </section>
+	  <section>
+	    <h2>We could keep going, but this is a good start</h2>
+	  </section>
+	  <section>
+	    <h2>Remember to keep things simple, but maintain proper boundaries</h2>
+	  </section>
+	  <section>
+	    <h2>Questions?</h2>
+	  </section>
+	</section>
+
+	<section>
+	  <section>
+	    <h2>Encryption and Key Management</h2>
+	  </section>
+	  <section>
+	    <h2>Let's set a baseline</h2>
+	  </section>
+	  <section>
+	    <h2>The Problem</h2>
+	  </section>
+	  <section>
+	    <h2>Encrypt an unknown amount of data at rest</h2>
+	  </section>
+	  <section>
+	    <h2>We should rely on symmetric encryption for this</h2>
+	  </section>
+	  <section>
+	    <h2>In particular, AES</h2>
+	  </section>
+	  <section>
+	    <h2>For this workshop we will use AES-256-GCM</h2>
+	  </section>
+	  <section>
+	    <h2>A breakdown</h2>
+	    <ul>
+	      <li>AES is the cipher core</li>
+	      <li>256 is length of the key in bits</li>
+	      <li>GCM, short for Galois Counter Mode, is the cipher block mode</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>There are other AES options, but this is the strongest choice*</h2>
+	  </section>
+	  <section>
+	    <h4>Example</h4>
+	    <pre>
+	      <code data-trim class="python">
+def encrypt(key, message):
+    cipher = AES.new(key, AES.MODE_GCM)
+    nonce = ciher.nonce
+    ciphertext, tag = cipher.encrypt_and_digest(message)
+    return (nonce, tag, ciphertext)
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="python">
+def decrypt(key, nonce, tag, ciphertext):
+    cipher = AES.new(key, AES.MODE_GCM, nonce)
+    return cipher.decrypt_and_verify(ciphertext, tag)
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Usage</h2>
+	    <pre>
+	      <code data-trim class="python">
+def main():
+    message = "Attack at dawn"
+    key = "ThisIsASecretKeyAReallySecretKey"
+
+    nonce, tag, ciphertext = encrypt(key, message)
+    plaintext = decrypt(key, nonce, tag, ciphertext)
+    pprint.pprint(plaintext)
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/kms/local> docker build -t local_aes .
+workshop/kms/local> docker run local_aes
+'Attack at dawn'
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Questions</h2>
+	    <ul>
+	      <li>Does this solve our encryption problem?</li>
+	      <li>How do we get a better key?</li>
+	      <li>How do we protect the key material?</li>
+	      <li>Is one encryption key enough?</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>Amazon KMS</h2>
+	  </section>
+	  <section>
+	    <h2>A hardware backed symmetric encryption service available via a simple API</h2>
+	  </section>
+	  <section>
+	    <h2>If you are encrypting anything inside of AWS, you should be using this service</h2>
+	  </section>
+	  <section>
+	    <h2>Any AWS service that stores data has a KMS option</h2>
+	  </section>
+	  <section>
+	    <h2>If you can, design your system to use RDS with KMS for data at rest</h2>
+	  </section>
+	  <section>
+	    <h2>Let's explore the other path</h2>
+	  </section>
+	  <section>
+	    <h2>Setup</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/kms> terraform init
+workshop/kms> terraform plan
+workshop/kms> terraform apply
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>This creates a KMS key with an alias and a dynamodb table</h2>
+	  </section>
+	  <section>
+	    <h2>We will use two types of encryption keys</h2>
+	    <ul>
+	      <li>Key Encryption Keys (KEK)</li>
+	      <li>Data Encryption Keys (DEK)</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>The dynamodb table is for data encryption keys</h2>
+	  </section>
+	  <section>
+	    <h2>Let's start with our KMS master key</h2>
+	    <pre>
+	      <code data-trim class="python">
+def main():
+    kms = boto3.client('kms')
+    keys = kms.list_keys()
+    cipher_text = kms.encrypt(
+        KeyId=keys['Keys'][0]['KeyId'],
+        Plaintext="Attack at dawn"
+    )
+    plain_text = kms.decrypt(
+        CiphertextBlob=cipher_text['CiphertextBlob']
+    )
+    pprint.pprint(plain_text['Plaintext'])
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Build and run</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/kms/kms_master> docker build -t kms_master .
+workshop/kms/kms_master> docker run  \
+-e AWS_ACCESS_KEY_ID=XXX             \
+-e AWS_SECRET_ACCESS_KEY=XXX         \
+-e AWS_DEFAULT_REGION=ap-southeast-2 \
+kms_master
+
+'Attack at dawn'
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>This creates a black box encryption scenario with no abiliity to gain control of key material or change the encrption process</h2>
+	  </section>
+	  <section>
+	    <h2>The downside is that it only works for data up to 4 kilobytes in size</h2>
+	  </section>
+	  <section>
+	    <h2>To solve our stated problem we will need to combine our use of KMS and isolated encryption</h2>
+	  </section>
+	  <section>
+	    <h2>We do this by using KMS to generate and encrypt data encryption keys</h2>
+	  </section>
+	  <section>
+	    <h2>We store our encrypted data encryption keys in dynamodb</h2>
+	  </section>
+	  <section>
+	    <h2>Generate a DEK and insert it into dynamodb</h2>
+	    <pre>
+	      <code data-trim class="python">
+def main():
+    kms = boto3.client('kms')
+    master_key_id = kms.list_keys()['Keys'][0]['KeyId']
+    dek = kms.generate_data_key(KeyId=master_key_id,
+                                KeySpec='AES_256')
+    encoded_dek = base64.b64encode(dek['CiphertextBlob'])
+
+    dynamo = boto3.client('dynamodb')
+    dynamo.put_item(
+        TableName='data_encryption_keys',
+        Item={
+            'KeyId': { 'S': "application" },
+            'Value': { 'S': encoded_dek   }
+        })
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Build and run</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/kms/dynamo> docker build -t insert_dek .
+workshop/kms/dynamo> docker run      \
+-e AWS_ACCESS_KEY_ID=XXX             \
+-e AWS_SECRET_ACCESS_KEY=XXX         \
+-e AWS_DEFAULT_REGION=ap-southeast-2 \
+insert_dek
+
+{u'Item': {u'KeyId': {u'S': u'application'},
+           u'Value': {u'S': u'XXX'}},
+ 'ResponseMetadata': {'HTTPHeaders': { ...SNIP... }
+                      'HTTPStatusCode': 200,
+                      'RequestId': XXX,
+                      'RetryAttempts': 0}}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Let's do an end to end encryption operation using our dynamodb and kms backed encryption keys</h2>
+	  </section>
+	  <section>
+	    <h2>Fetch and decrypt DEK</h2>
+	    <pre>
+	      <code data-trim class="python">
+def fetch_encryption_key():
+    kms = boto3.client('kms')
+    dynamo = boto3.client('dynamodb')
+
+    encrypted_key = dynamo.get_item(
+        TableName='data_encryption_keys',
+        Key={ 'KeyId': { 'S': "application" } }
+    )
+
+    return kms.decrypt(
+        CiphertextBlob=base64.decodestring(
+            encrypted_key['Item']['Value']['S']
+        )
+    )['Plaintext']
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <pre>
+	      <code data-trim class="python">
+def main():
+    key = fetch_encryption_key()
+    message = "Attack at dawn"
+
+    nonce, tag, ciphertext = encrypt(key, message)
+    plaintext = decrypt(key, nonce, tag, ciphertext)
+
+    pprint.pprint(plaintext)
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/kms/complete> docker build -t complete .
+workshop/kms/complete> docker run    \
+-e AWS_ACCESS_KEY_ID=XXX             \
+-e AWS_SECRET_ACCESS_KEY=XXX         \
+-e AWS_DEFAULT_REGION=ap-southeast-2 \
+complete
+
+'Attack at dawn'
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>This assumes a single data encryption key for all data in an application</h2>
+	  </section>
+	  <section>
+	    <h2>Other Options</h2>
+	    <ul>
+	      <li>A DEK per customer</li>
+	      <li>A DEK per record</li>
+	      <li>A DEK per shard</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>When using multiple DEKs, make sure to store the key id with the record in the database</h2>
+	  </section>
+	  <section>
+	    <h2>Wrap Up</h2>
+	    <ul>
+	      <li>Does this solve our encryption problem?</li>
+	      <li>How do we get a better key?</li>
+	      <li>How do we protect the key material?</li>
+	      <li>Is one encryption key enough?</li>
+	    </ul>
+	  </section>
+	  <section>
+	    <h2>Questions?</h2>
+	  </section>
+	</section>
+
+	<section>
+	  <section>
+	    <h2>Wrap Up</h2>
+	  </section>
+	  <section>
+	    <h2>Group Discussion and Questions</h2>
+	  </section>
+	</section>
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+      Reveal.initialize({
+        dependencies: [
+          { src: 'plugin/markdown/marked.js' },
+          { src: 'plugin/markdown/markdown.js' },
+          { src: 'plugin/notes/notes.js', async: true },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+    </script>
+  </body>
 </html>
