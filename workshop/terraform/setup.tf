@@ -10,10 +10,10 @@ resource "aws_s3_bucket" "abedra-yow-tfstate" {
     }
 }
 
-# terraform {
-#     backend "s3" {
-#         bucket = "abedra-yow-tfstate"
-#         key = "setup/terraform.tfstate"
-#         region = "ap-southeast-2"
-#     }
-# }
+terraform {
+    backend "s3" {
+        bucket = "abedra-yow-tfstate"
+        key = "setup/terraform.tfstate"
+        region = "ap-southeast-2"
+    }
+}

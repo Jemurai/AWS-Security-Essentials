@@ -67,13 +67,26 @@ resource "aws_security_group" "api_security_group" {
     }
 }
 
+resource "aws_security_group" "tls_security_group" {
+    name = "api_security_group"
+    description = "Allowed inbound ports for api"
+    vpc_id = "${aws_vpc.yow.id}"
+
+    ingress {
+        from_port = 443
+        to_port = 443
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+
 resource "aws_instance" "api" {
     ami = "ami-ccecf5af"
     instance_type = "t2.micro"
     associate_public_ip_address = true
     subnet_id = "${aws_subnet.yow_subnet.id}"
     vpc_security_group_ids = [
-        "${aws_security_group.api_security_group.id}", 
+        "${aws_security_group.api_security_group.id}",
         "${aws_security_group.internal_ssh.id}"
     ]
 }

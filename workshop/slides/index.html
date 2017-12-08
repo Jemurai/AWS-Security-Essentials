@@ -200,8 +200,8 @@ mfa_audit
 	    </pre>
 	    <pre>
 	      <code data-trim class="python">
-workshop/auditing/mfa> docker build -t inactive_user_audit .
-workshop/auditing/mfa> docker run \
+workshop/auditing/inactive> docker build -t inactive_user_audit .
+workshop/auditing/inactive> docker run \
 -e AWS_ACCESS_KEY_ID=XXX          \
 -e AWS_SECRET_ACCESS_KEY=xxx      \
 inactive_user_audit
@@ -790,7 +790,7 @@ resource "aws_instance" "api" {
 	      <code data-trim class="python">
 def encrypt(key, message):
     cipher = AES.new(key, AES.MODE_GCM)
-    nonce = ciher.nonce
+    nonce = cipher.nonce
     ciphertext, tag = cipher.encrypt_and_digest(message)
     return (nonce, tag, ciphertext)
 	      </code>
