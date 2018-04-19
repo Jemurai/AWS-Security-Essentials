@@ -1,19 +1,20 @@
 provider "aws" {
-    region = "ap-southeast-2"
+  region = "us-east-2"
 }
 
-resource "aws_s3_bucket" "abedra-yow-tfstate" {
-    bucket = "abedra-yow-tfstate"
-    acl = "private"
-    versioning {
-        enabled  = true
-    }
+resource "aws_s3_bucket" "abedra-goto-tfstate" {
+  bucket = "abedra-goto-tfstate"
+  acl = "private"
+
+  versioning {
+    enabled  = true
+  }
 }
 
 terraform {
-    backend "s3" {
-        bucket = "abedra-yow-tfstate"
-        key = "setup/terraform.tfstate"
-        region = "ap-southeast-2"
-    }
+  backend "s3" {
+    bucket = "abedra-goto-tfstate"
+    key = "setup/terraform.tfstate"
+    region = "us-east-2"
+  }
 }

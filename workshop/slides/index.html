@@ -97,31 +97,87 @@
 	    <h2>And don't hesitate to ask any questions</h2>
 	  </section>
 	  <section>
-	    <h2>Our initial script</h2>
+	    <h2>First, login to the AWS Console</h2>
+	  </section>
+	  <section>
+	    <h2>Navigate to the S3 service</h2>
+	  </section>
+	  <section>
+	    <h2>Create a bucket for the workshop</h2>
+	    <pre>
+	      <code data-trim class="shell">
+abedra-goto-tfstate
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Before we start terraform, let's look at our first script</h2>
+	  </section>
+	  <section>
+	    <h2>The provider</h2>
 	    <pre>
 	      <code data-trim class="terraform">
 provider "aws" {
-    region = "ap-southeast-2"
-}
-
-resource "aws_s3_bucket" "abedra-yow-tfstate" {
-    bucket = "abedra-yow-tfstate"
-    acl = "private"
-    versioning {
-        enabled  = true
-    }
+  region = "us-east-2"
 }
 	      </code>
 	    </pre>
 	  </section>
 	  <section>
-	    <h2>This script creates a single S3 bucket</h2>
+	    <h2>The resource</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+
+resource "aws_s3_bucket" "abedra-goto-tfstate" {
+  bucket = "abedra-goto-tfstate"
+  acl = "private"
+
+  versioning {
+    enabled  = true
+  }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Our Terraform state</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+terraform {
+  backend "s3" {
+    bucket = "abedra-goto-tfstate"
+    key = "setup/terraform.tfstate"
+    region = "us-east-2"
+  }
+}
+	      </code>
+	    </pre>
 	  </section>
 	  <section>
 	    <p>Open the <em>workshop/terraform/setup.tf</em> file and change the name of the bucket to your desired name</p>
+	  </section>
+	  <section>
+	    <h2>Initialize Terraform</h2>
 	    <pre>
 	      <code data-trim class="shell">
 workshop/terraform> terraform init
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Next, we need to import the bucket we just created</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/terraform> terraform import \
+                    aws_s3_bucket.abedra-goto-tfstate \
+                    abedra-goto-tfstate
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Finally, we apply our changes</h2>
+	    <pre>
+	      <code data-trim class="shell">
 workshop/terraform> terraform plan
 workshop/terraform> terraform apply
 	      </code>
@@ -129,31 +185,6 @@ workshop/terraform> terraform apply
 	  </section>
 	  <section>
 	    <h2>Throughout the workshop we will use this bucket to store our terraform state</h2>
-	  </section>
-	  <section>
-	    <h2>Let's update our script to point terraform to our new bucket</h2>
-	    <pre>
-	      <code data-trim class="terraform">
-terraform {
-    backend "s3" {
-        bucket = "abedra-yow-tfstate"
-        key = "setup/terraform.tfstate"
-        region = "ap-southeast-2"
-    }
-}
-	      </code>
-	    </pre>
-	  </section>
-	  <section>
-	    <h2>Doing this requires us to reinitialize terraform</h2>
-	    <pre>
-	      <code data-trim class="shell">
-workshop/terraform> terraform init
-	      </code>
-	    </pre>
-	  </section>
-	  <section>
-	    <h2>After initialization our terraform state fill will be in the designated bucket</h2>
 	  </section>
 	  <section>
 	    <h2>Check the buket in your AWS console to make sure this worked properly</h2>
