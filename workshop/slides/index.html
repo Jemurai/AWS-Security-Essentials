@@ -205,6 +205,95 @@ workshop/terraform> terraform apply
 	    <h2>Auditing</h2>
 	  </section>
 	  <section>
+	    <h2>How do we track what our users are doing?</h2>
+	  </section>
+	  <section>
+	    <h2>Cloudtrail</h2>
+	  </section>
+	  <section>
+	    <h2>Cloudtrail logs all activity to the AWS API</h2>
+	  </section>
+	  <section>
+	    <h2>These logs provide actionable data that you can use to automate security response</h2>
+	  </section>
+	  <section>
+	    <h2>This is vital to to the auditing process and gives you a way to track every action taken on the platform</h2>
+	  </section>
+	  <section>
+	    <h2>The output of Cloudtrail will go to S3</h2>
+	  </section>
+	  <section>
+	    <h2>But you can use more advanced tooling to process CloudTrail events and issue alerts</h2>
+	  </section>
+	  <section>
+	    <h2>One of these tools is GuardDuty</h2>
+	  </section>
+	  <section>
+	    <h2>GuardDuty analyzes CloudTrail and alert on events that have high correlation with security issues</h2>
+	  </section>
+	  <section>
+	    <h2>It monitors outbound network connections and flags connections with known bad actors</h2>
+	  </section>
+	  <section>
+	    <h2>It monitors dns requests and flags queries that resolve to known bad actors</h2>
+	  </section>
+	  <section>
+	    <h2>It alerts on overexposure of resources</h2>
+	  </section>
+	  <section>
+	    <h2>And it alerts when overexposed resources are probed or attacked</h2>
+	  </section>
+	  <section>
+	    <h2>It's new and under active development, so look for more features very soon</h2>
+	  </section>
+	  <section>
+	    <h2>Let's initialize terraform in the auditing directory</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/auditing> terraform init
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Now let's review what we are going to add</h2>
+	  </section>
+	  <section>
+	    <h2>Finally, let's deploy CloudTrail and GuardDuty</h2>
+	    <pre>
+	      <code data-trim class="shell">
+workshop/auditing> terraform plan
+workshop/auditing> terraform apply
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Navigate to the S3 bucket in the AWS console</h2>
+	  </section>
+	  <section>
+	    <h2>Check back throughout the day to see what ends up there</h2>
+	  </section>
+	  <section>
+	    <pre>
+	      <code data-trim class="json">
+{
+  "eventVersion":"1.02","userIdentity": {
+    "type":"Root",
+    "principalId":"489175270805",
+    "arn":"arn:aws:iam::489175270805:root",
+    "accountId":"489175270805",
+    "accessKeyId":"ASIAIYHVC5VYM22SHTXQ",
+  },
+  "eventTime":"2017-11-24T22:12:51Z",
+  "eventName":"GetAccountPasswordPolicy",
+  "sourceIPAddress":"199.27.255.43",
+  "requestID":"9c81b384-d164-11e7-b896-bb38c46dd0a0",
+  "eventID":"35ba2cdd-7b76-40bc-aeca-3b7283518bae",
+  "eventType":"AwsApiCall","recipientAccountId":"489175270805"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
 	    <h2>How do we know our AWS configuration doesn't have security issues?</h2>
 	  </section>
 	  <section>
@@ -247,29 +336,26 @@ inactive_user_audit
 	    <h2>Let's try something a little more effective</h2>
 	    <pre>
 	      <code data-trim class="shell">
-workshop/auditing/scout2> docker build -t audit .
+workshop/auditing/scout2> docker build -t scout .
 workshop/auditing/scout2> docker run \
+-p 22222:80                   \
 -e AWS_ACCESS_KEY_ID=XXX      \
 -e AWS_SECRET_ACCESS_KEY=xxx  \
-audit
+scout
 	      </code>
 	    </pre>
 	  </section>
 	  <section>
-	    <h2>Results</h2>
+	    <h2>Navigate to http://localhost:22222</h2>
 	    <pre>
 	      <code data-trim class="shell">
-Creating scout2-report/report.html ...
-[iam] Root account used recently : 1
-[iam] Minimum password length too short : 1
-[iam] Password expiration disabled : 1
-[cloudtrail] Not configured : 13
-[cloudtrail] Log file validation disabled : 1
-[ec2] SSH port open to all : 1
-[vpc] Subnet with allow all egress NACLs : 32
-[vpc] Subnet with allow all ingress NACLs : 32
-Scout2 danger issues identified. Please correct the issues
-listed above. See scout2-report/report.html for more details
+Fetching IAM config..
+... Lots of output ...
+*** Visit ***
+
+http://localhost:22222
+
+*** to view the report ***
 	      </code>
 	    </pre>
 	  </section>
@@ -289,65 +375,10 @@ listed above. See scout2-report/report.html for more details
 	    <h2>Pick and choose your battles, not everything you find is an emergency</h2>
 	  </section>
 	  <section>
-	    <h2>This gets us configuration auditing, but what about user activity?</h2>
-	  </section>
-	  <section>
-	    <h2>Cloudtrail</h2>
-	  </section>
-	  <section>
-	    <h2>Cloudtrail logs all activity to the AWS API</h2>
-	  </section>
-	  <section>
-	    <h2>These logs provide actionable data that you can use to automate security response</h2>
-	  </section>
-	  <section>
-	    <h2>You can even feed Cloudtrail logs into a SIEM</h2>
-	  </section>
-	  <section>
-	    <h2>Setup</h2>
-	    <pre>
-	      <code data-trim class="shell">
-workshop/auditing> terraform init
-workshop/auditing> terraform plan
-workshop/auditing> terraform apply
-	      </code>
-	    </pre>
-	  </section>
-	  <section>
-	    <h2>You just enabled Cloudtrail and created an S3 bucket to store the logs</h2>
-	  </section>
-	  <section>
-	    <h2>Navigate to the S3 bucket in the AWS console</h2>
-	  </section>
-	  <section>
-	    <h2>Check back throughout the day to see what ends up there</h2>
-	  </section>
-	  <section>
-	    <pre>
-	      <code data-trim class="json">
-{
-  "eventVersion":"1.02","userIdentity": {
-    "type":"Root",
-    "principalId":"489175270805",
-    "arn":"arn:aws:iam::489175270805:root",
-    "accountId":"489175270805",
-    "accessKeyId":"ASIAIYHVC5VYM22SHTXQ",
-  },
-  "eventTime":"2017-11-24T22:12:51Z",
-  "eventName":"GetAccountPasswordPolicy",
-  "sourceIPAddress":"199.27.255.43",
-  "requestID":"9c81b384-d164-11e7-b896-bb38c46dd0a0",
-  "eventID":"35ba2cdd-7b76-40bc-aeca-3b7283518bae",
-  "eventType":"AwsApiCall","recipientAccountId":"489175270805"
-}
-	      </code>
-	    </pre>
-	  </section>
-	  <section>
 	    <h2>Let's walk through a real world scenario</h2>
 	  </section>
 	  <section>
-	    <h4>https://aws.amazon.com/blogs/security/how-to-receive-notifications-when-your-aws-accounts-root-access-keys-are-used/</h4>
+	    <p>https://aws.amazon.com/blogs/security/how-to-receive-notifications-when-your-aws-accounts-root-access-keys-are-used/</p>
 	  </section>
 	  <section>
 	    <h2>Setting up alarms like this can be a key differentiator in detecting and understanding a breach</h2>
@@ -362,6 +393,9 @@ workshop/auditing> terraform apply
 	      <li>Anyone logs into the AWS console</li>
 	      <li>Anything that would signal unexpected behavior</li>
 	    </ul>
+	  </section>
+	  <section>
+	    <h2>GuardDuty will trigger alerts on the big risks, but you can create alerts on any behavior you wish</h2>
 	  </section>
 	  <section>
 	    <h2>Questions?</h2>
