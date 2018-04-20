@@ -1,20 +1,28 @@
 provider "aws" {
-  region = "ap-southeast-2"
+  region = "us-east-2"
 }
 
 terraform {
     backend "s3" {
-        bucket = "abedra-yow-tfstate"
+        bucket = "abedra-goto-tfstate"
         key = "iam/terraform.tfstate"
-        region = "ap-southeast-2"
+        region = "us-east-2"
     }
+}
+
+resource "aws_iam_user" "audit" {
+  name = "audit"
+}
+
+resource "aws_iam_user" "goto" {
+  name = "goto"
 }
 
 variable "read_only_users" {
   type = "list"
   description = "Users that are allowed to assume ReadOnly rights"
   default = [
-    "abedra"
+    "audit"
   ]
 }
 
@@ -22,7 +30,7 @@ variable "admin_users" {
   type = "list"
   description = "Users that are allowed to assume full Admin rights"
   default = [
-    "abedra"
+    "goto"
   ]
 }
 
@@ -109,16 +117,6 @@ resource "aws_iam_policy" "assume_admin" {
 EOF
 }
 
-resource "aws_iam_group" "admins" {
-  name = "admins"
-}
-
-resource "aws_iam_group_membership" "admin_group_membership" {
-  name = "admin_group_membership"
-  users = "${var.admin_users}"
-  group = "${aws_iam_group.admins.name}"
-}
-
 resource "aws_iam_policy_attachment" "read_only_policy_attachment" {
   name = "read_only_policy_attachment"
   roles = ["${aws_iam_role.read_only.name}"]
@@ -128,7 +126,7 @@ resource "aws_iam_policy_attachment" "read_only_policy_attachment" {
 resource "aws_iam_policy_attachment" "admin_policy_attachment" {
   name = "admin_policy_attachment"
   roles = ["${aws_iam_role.admin.name}"]
-  groups = ["${aws_iam_group.admins.name}"]
+  # groups = ["${aws_iam_group.admins.name}"]
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
