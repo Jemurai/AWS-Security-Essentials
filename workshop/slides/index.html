@@ -431,13 +431,27 @@ http://localhost:22222
 	    <h2>Let's take a look at the setup</h2>
 	  </section>
 	  <section>
-	    <h2>First, create a list of users</h2>
+	    <h2>First, create some users</h2>
+	    <pre>
+	      <code data-trim class="terraform">
+resource "aws_iam_user" "audit" {
+  name = "audit"
+}
+
+resource "aws_iam_user" "goto" {
+  name = "goto"
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Next, add the users to lists</h2>
 	    <pre>
 	      <code data-trim class="terraform">
 variable "read_only_users" {
   type = "list"
   description = "Read only users"
-  default = [ "abedra" ]
+  default = [ "audit" ]
 }
 	      </code>
 	    </pre>
@@ -446,7 +460,7 @@ variable "read_only_users" {
 variable "admin_users" {
   type = "list"
   description = "Admin Users"
-  default = [ "abedra" ]
+  default = [ "goto" ]
 }
 	      </code>
 	    </pre>
@@ -524,6 +538,24 @@ workshop/iam> terraform apply
 	  </section>
 	  <section>
 	    <h2>Log into the AWS console and explore the updates</h2>
+	  </section>
+	  <section>
+	    <h2>Grab keys for each of the newly created users</h2>
+	    <pre>
+	      <code data-trim class="shell">
+aws iam create-access-key --user-name audit | \
+jq 'getpath(["AccessKey", "AccessKeyId"], \
+["AccessKey", "SecretAccessKey"])'
+	      </code>
+	    </pre>
+	    <pre>
+	      <code data-trim class="shell">
+aws iam create-access-key --user-name goto | \
+jq 'getpath(["AccessKey", "AccessKeyId"], \
+["AccessKey", "SecretAccessKey"])'
+	      </code>
+	    </pre>
+
 	  </section>
 	  <section>
 	    <h2>So how do we use these roles?</h2>
