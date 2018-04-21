@@ -555,7 +555,6 @@ jq 'getpath(["AccessKey", "AccessKeyId"], \
 ["AccessKey", "SecretAccessKey"])'
 	      </code>
 	    </pre>
-
 	  </section>
 	  <section>
 	    <h2>So how do we use these roles?</h2>
@@ -565,6 +564,21 @@ jq 'getpath(["AccessKey", "AccessKeyId"], \
 	  </section>
 	  <section>
 	    <h2>Security Token Service provides temporary, limited credentials</h2>
+	  </section>
+	  <section>
+	    <h2>Before we try STS we need to know the arn of the role we want to assume</h2>
+	  </section>
+	  <section>
+	    <h2>List Role arns</h2>
+	    <pre>
+	      <code data-trim class="shell">
+aws iam list-roles | jq -r ".Roles | .[].Arn"
+arn:aws:iam::489175270805:role/admin
+arn:aws:iam::489175270805:role/aws-service-role/
+  guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
+arn:aws:iam::489175270805:role/read_only
+	      </code>
+	    </pre>
 	  </section>
 	  <section>
 	    <h2>Users use their AWS credentials to get STS tokens that are used to make API calls</h2>
