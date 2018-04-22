@@ -3,11 +3,20 @@ provider "aws" {
 }
 
 terraform {
-    backend "s3" {
-        bucket = "abedra-goto-tfstate"
-        key = "iam/terraform.tfstate"
-        region = "us-east-2"
-    }
+  backend "s3" {
+    bucket = "abedra-goto-tfstate"
+    key = "iam/terraform.tfstate"
+    region = "us-east-2"
+  }
+}
+
+resource "aws_iam_account_password_policy" "approved" {
+  minimum_password_length        = 8
+  require_lowercase_characters   = true
+  require_numbers                = true
+  require_uppercase_characters   = true
+  require_symbols                = true
+  allow_users_to_change_password = true
 }
 
 resource "aws_iam_user" "audit" {

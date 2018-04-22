@@ -1,0 +1,9 @@
+aws ec2 describe-vpcs
+
+aws ec2 describe-security-groups
+
+aws ec2 describe-instances --query "Reservations[].Instances[].[InstanceId,PublicIpAddress]"
+
+aws ec2 describe-instances --instance-ids i-01825ce8bd5844896
+
+aws ec2 describe-flow-logs

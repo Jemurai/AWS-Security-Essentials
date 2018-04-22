@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """This script performs a symmetric encrypt and decrypt operation using a KMS master key"""
 
-import pprint
+from pprint import pprint
 import boto3
+import base64
 
 
 def main():
@@ -15,11 +16,13 @@ def main():
         Plaintext="Attack at dawn"
     )
 
+    pprint(base64.b64encode(cipher_text['CiphertextBlob']))
+
     plain_text = kms.decrypt(
         CiphertextBlob=cipher_text['CiphertextBlob']
     )
 
-    pprint.pprint(plain_text['Plaintext'])
+    pprint(plain_text['Plaintext'])
 
 
 if __name__ == '__main__':

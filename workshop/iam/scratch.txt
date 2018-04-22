@@ -1,0 +1,15 @@
+aws iam get-account-password-policy
+
+aws iam list-roles
+
+aws iam list-roles | jq -r '.Roles | .[].RoleName'
+
+aws iam get-role --role-name admin
+
+aws iam generate-credential-report
+
+aws iam get-credential-report | jq .Content | base64 -dn > out.csv && open out.csv
+
+aws iam list-users
+
+aws iam list-attached-user-policies --user-name abedra
