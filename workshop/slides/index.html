@@ -1053,7 +1053,7 @@ workshop/kms/kms_master> docker build -t kms_master .
 workshop/kms/kms_master> docker run  \
 -e AWS_ACCESS_KEY_ID=XXX             \
 -e AWS_SECRET_ACCESS_KEY=XXX         \
--e AWS_DEFAULT_REGION=ap-southeast-2 \
+-e AWS_DEFAULT_REGION=us-east-2 \
 kms_master
 
 'Attack at dawn'
@@ -1104,7 +1104,7 @@ workshop/kms/dynamo> docker build -t insert_dek .
 workshop/kms/dynamo> docker run      \
 -e AWS_ACCESS_KEY_ID=XXX             \
 -e AWS_SECRET_ACCESS_KEY=XXX         \
--e AWS_DEFAULT_REGION=ap-southeast-2 \
+-e AWS_DEFAULT_REGION=us-east-2 \
 insert_dek
 
 {u'Item': {u'KeyId': {u'S': u'application'},
@@ -1159,7 +1159,7 @@ workshop/kms/complete> docker build -t complete .
 workshop/kms/complete> docker run    \
 -e AWS_ACCESS_KEY_ID=XXX             \
 -e AWS_SECRET_ACCESS_KEY=XXX         \
--e AWS_DEFAULT_REGION=ap-southeast-2 \
+-e AWS_DEFAULT_REGION=us-east-2 \
 complete
 
 'Attack at dawn'
