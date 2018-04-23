@@ -574,8 +574,6 @@ jq 'getpath(["AccessKey", "AccessKeyId"], \
 	      <code data-trim class="shell">
 aws iam list-roles | jq -r ".Roles | .[].Arn"
 arn:aws:iam::489175270805:role/admin
-arn:aws:iam::489175270805:role/aws-service-role/
-  guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
 arn:aws:iam::489175270805:role/read_only
 	      </code>
 	    </pre>
@@ -583,6 +581,55 @@ arn:aws:iam::489175270805:role/read_only
 	  <section>
 	    <h2>Users use their AWS credentials to get STS tokens that are used to make API calls</h2>
 	  </section>
+	  <section>
+	    <h2>Grab tokens</h2>
+	    <pre>
+	      <code data-trim class="shell">
+aws sts assume-role                                 \
+--role-arn arn:aws:iam::489175270805:role/read_only \
+--role-session-name audit-test
+{
+    "Credentials": {
+        "AccessKeyId": "XXX",
+        "SecretAccessKey": "XXX",
+        "SessionToken": "XXX",
+    },
+    "AssumedRoleUser": {
+        "AssumedRoleId": "XXX:audit-test",
+        "Arn": "XXX:assumed-role/read_only/audit-test"
+    }
+}
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Set the environment</h2>
+	    <pre>
+	      <code data-trim class="shell">
+export AWS_ACCESS_KEY_ID=XXX
+export AWS_SECRET_ACCESS_KEY=XXX
+export AWS_SESSION_TOKEN=XXX
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
+	    <h2>Verify</h2>
+	    <pre>
+	      <code data-trim class="shell">
+aws sts get-caller-identity
+{
+    "UserId": "AROAJ6TY53DCE4TYG6JWC:audit-test",
+    "Account": "489175270805",
+    "Arn": "arn:aws:sts::489175270805:assumed-role/read_only/audit-test"
+}
+
+aws s3 ls
+2018-04-19 14:40:37 abedra-goto-audit
+2018-04-19 11:35:45 abedra-goto-tfstate
+	      </code>
+	    </pre>
+	  </section>
+
 	  <section>
 	    <h2>But there's an easier way</h2>
 	  </section>
@@ -608,7 +655,7 @@ arn:aws:iam::489175270805:role/read_only
 	    <h2>Let's go through the setup</h2>
 	  </section>
 	  <section>
-	    <h2>https://github.com/99designs/aws-vault</h2>
+	    <p>https://github.com/99designs/aws-vault</p>
 	  </section>
 	  <section>
 	    <h4>~/.aws/config</h4>
@@ -616,16 +663,16 @@ arn:aws:iam::489175270805:role/read_only
 	      <code data-trim class="config">
 [default]
 output = json
-region = ap-southeast-2
+region = us-east-2
 
 [profile personal-admin]
-region=ap-southeast-2
+region=us-east-2
 output=json
 role_arn=arn:aws:iam::489175270805:role/admin
 mfa_serial=arn:aws:iam::489175270805:mfa/abedra
 
 [profile personal-read_only]
-region=ap-southeast-2
+region=us-east-2
 output=json
 role_arn=arn:aws:iam::489175270805:role/read_only
 mfa_serial=arn:aws:iam::489175270805:mfa/abedra
@@ -655,13 +702,8 @@ personal-admin
 	    <pre>
 	      <code data-trim class="shell">
 workshop/iam> aws-vault exec personal-read_only -- aws s3 ls
-2017-09-01 01:23:14 abedra-personal-tfstate
-2017-11-25 09:06:31 abedra-workshop-audit
-2017-11-25 08:36:28 abedra-workshop-tfstate
-2017-11-27 14:46:13 abedra-yow-audit
-2017-11-27 11:30:31 abedra-yow-tfstate
-2017-08-04 12:45:53 aws-vault-test-1
-2017-08-18 04:50:25 aws-vault-test-2
+2018-04-19 14:40:37 abedra-goto-audit
+2018-04-19 11:35:45 abedra-goto-tfstate
 	      </code>
 	    </pre>
 	  </section>

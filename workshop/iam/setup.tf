@@ -10,14 +10,14 @@ terraform {
   }
 }
 
-resource "aws_iam_account_password_policy" "approved" {
-  minimum_password_length        = 8
-  require_lowercase_characters   = true
-  require_numbers                = true
-  require_uppercase_characters   = true
-  require_symbols                = true
-  allow_users_to_change_password = true
-}
+# resource "aws_iam_account_password_policy" "approved" {
+#   minimum_password_length        = 8
+#   require_lowercase_characters   = true
+#   require_numbers                = true
+#   require_uppercase_characters   = true
+#   require_symbols                = true
+#   allow_users_to_change_password = true
+# }
 
 resource "aws_iam_user" "audit" {
   name = "audit"
@@ -58,12 +58,7 @@ resource "aws_iam_role" "read_only" {
                 "AWS": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
             },
             "Effect": "Allow",
-            "Sid": "",
-            "Condition": {
-                "Bool": {
-                    "aws:MultifactorAuthPresent": "true"
-                }
-            }
+            "Sid": ""
         }
     ]
 }
