@@ -58,6 +58,8 @@
 	      <li>A clone of this repository</li>
 	      <li>Docker</li>
 	      <li>Terraform</li>
+        <li>AWS Command Line Interface (awscli)</li>
+        <li>jq</li>
 	      <li>An AWS account with full administrative permissions</li>
 	      <li>A working internet connection</li>
 	    </ul>
@@ -97,16 +99,10 @@
 	    <h2>And don't hesitate to ask any questions</h2>
 	  </section>
 	  <section>
-	    <h2>First, login to the AWS Console</h2>
-	  </section>
-	  <section>
-	    <h2>Navigate to the S3 service</h2>
-	  </section>
-	  <section>
 	    <h2>Create a bucket for the workshop</h2>
 	    <pre>
 	      <code data-trim class="shell">
-abedra-goto-tfstate
+aws s3 mb s3://abedra-goto-tfstate --region us-east-2
 	      </code>
 	    </pre>
 	  </section>
