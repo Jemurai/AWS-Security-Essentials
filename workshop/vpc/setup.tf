@@ -96,8 +96,25 @@ resource "aws_security_group" "tls_security_group" {
   }
 }
 
+data "aws_ami" "image" {
+  most_recent = true
+
+  filter {
+    name   = "owner-alias"
+    values = ["amazon"]
+  }
+
+  filter {
+    name = "name"
+
+    values = [
+      "amzn-ami-hvm-*-x86_64-gp2"
+    ]
+  }
+}
+
 resource "aws_instance" "api" {
-  ami = "ami-25615740"
+  ami = "${data.aws_ami.image.id}"
   instance_type = "t2.micro"
   associate_public_ip_address = true
   subnet_id = "${aws_subnet.goto_subnet.id}"
