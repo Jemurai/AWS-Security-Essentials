@@ -583,6 +583,15 @@ arn:aws:iam::489175270805:role/read_only
 	    <h2>Users use their AWS credentials to get STS tokens that are used to make API calls</h2>
 	  </section>
 	  <section>
+	    <h2>Use audit credentials</h2>
+	    <pre>
+	      <code data-trim class="shell">
+export AWS_ACCESS_KEY_ID=XXX
+export AWS_SECRET_ACCESS_KEY=xxx
+	      </code>
+	    </pre>
+	  </section>
+	  <section>
 	    <h2>Grab tokens</h2>
 	    <pre>
 	      <code data-trim class="shell">
@@ -684,14 +693,14 @@ mfa_serial=arn:aws:iam::489175270805:mfa/abedra
 	    <h2>Now we import our credentials into vault</h2>
 	    <pre>
 	      <code data-trim class="shell">
-workshop/iam> aws-vault add personal-read_only
+workshop/iam> aws-vault add personal-audit
 Enter Access Key ID: XXX
 Enter Secret Access Key: XXX
-Added credentials to profile "personal-read_only" in vault
-workshop/iam> aws-vault add personal-admin
+Added credentials to profile "personal-audit" in vault
+workshop/iam> aws-vault add personal-goto
 Enter Access Key ID: XXX
 Enter Secret Access Key: XXX
-Added credentials to profile "personal-admin" in vault
+Added credentials to profile "personal-goto" in vault
 workshop/iam> aws-vault list
 personal-read_only
 personal-admin
