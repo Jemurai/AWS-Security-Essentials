@@ -4,7 +4,7 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = "abedra-goto-tfstate"
+    bucket = "abedra-tfstate"
     key    = "vpc/terraform.tfstate"
     region = "us-east-2"
   }
@@ -27,12 +27,12 @@ data "aws_ami" "image" {
   }
 }
 
-resource "aws_vpc" "goto" {
+resource "aws_vpc" "workshop" {
   cidr_block = "10.1.0.0/16"
 }
 
-resource "aws_subnet" "goto_subnet" {
-  vpc_id            = "${aws_vpc.goto.id}"
+resource "aws_subnet" "workshop_subnet" {
+  vpc_id            = "${aws_vpc.workshop.id}"
   cidr_block        = "10.1.0.0/24"
   availability_zone = "us-east-2a"
 }
@@ -40,7 +40,7 @@ resource "aws_subnet" "goto_subnet" {
 resource "aws_security_group" "bastion_external" {
   name        = "bastion_external_security_group"
   description = "Allowed external ports for bastion hosts"
-  vpc_id      = "${aws_vpc.goto.id}"
+  vpc_id      = "${aws_vpc.workshop.id}"
 
   ingress {
     from_port   = 22
@@ -57,7 +57,7 @@ resource "aws_security_group" "bastion_external" {
 resource "aws_security_group" "internal_ssh" {
   name        = "bastion_internal_security_group"
   description = "Allow SSH via internal instances"
-  vpc_id      = "${aws_vpc.goto.id}"
+  vpc_id      = "${aws_vpc.workshop.id}"
 
   ingress {
     from_port   = 22
@@ -75,14 +75,14 @@ resource "aws_instance" "bastion" {
   ami                         = "${data.aws_ami.image.id}"
   instance_type               = "t2.micro"
   associate_public_ip_address = true
-  subnet_id                   = "${aws_subnet.goto_subnet.id}"
+  subnet_id                   = "${aws_subnet.workshop_subnet.id}"
   vpc_security_group_ids      = ["${aws_security_group.bastion_external.id}"]
 }
 
 resource "aws_security_group" "api_security_group" {
   name        = "api_security_group"
   description = "Allowed inbound ports for api"
-  vpc_id      = "${aws_vpc.goto.id}"
+  vpc_id      = "${aws_vpc.workshop.id}"
 
   ingress {
     from_port   = 80
@@ -99,7 +99,7 @@ resource "aws_security_group" "api_security_group" {
 resource "aws_security_group" "tls_security_group" {
   name        = "tls_security_group"
   description = "Allowed inbound ports for api"
-  vpc_id      = "${aws_vpc.goto.id}"
+  vpc_id      = "${aws_vpc.workshop.id}"
 
   ingress {
     from_port   = 443
@@ -117,7 +117,7 @@ resource "aws_instance" "api" {
   ami                         = "${data.aws_ami.image.id}"
   instance_type               = "t2.micro"
   associate_public_ip_address = true
-  subnet_id                   = "${aws_subnet.goto_subnet.id}"
+  subnet_id                   = "${aws_subnet.workshop_subnet.id}"
 
   vpc_security_group_ids = [
     "${aws_security_group.api_security_group.id}",

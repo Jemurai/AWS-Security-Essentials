@@ -23,8 +23,8 @@ resource "aws_iam_user" "audit" {
   name = "audit"
 }
 
-resource "aws_iam_user" "goto" {
-  name = "goto"
+resource "aws_iam_user" "operator" {
+  name = "operator"
 }
 
 variable "read_only_users" {
@@ -41,7 +41,7 @@ variable "admin_users" {
   description = "Users that are allowed to assume full Admin rights"
 
   default = [
-    "goto",
+    "operator",
   ]
 }
 

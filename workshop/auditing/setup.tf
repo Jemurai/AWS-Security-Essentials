@@ -4,7 +4,7 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = "abedra-goto-tfstate"
+    bucket = "abedra-tfstate"
     key    = "auditing/terraform.tfstate"
     region = "us-east-2"
   }
@@ -21,7 +21,7 @@ data "aws_iam_policy_document" "policy" {
     }
 
     actions   = ["s3:GetBucketAcl"]
-    resources = ["${aws_s3_bucket.abedra-goto-audit.arn}"]
+    resources = ["${aws_s3_bucket.abedra-audit.arn}"]
   }
 
   statement {
@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "policy" {
     }
 
     actions   = ["s3:PutObject"]
-    resources = ["${aws_s3_bucket.abedra-goto-audit.arn}/audit/*"]
+    resources = ["${aws_s3_bucket.abedra-audit.arn}/audit/*"]
 
     condition {
       test     = "StringEquals"
@@ -46,23 +46,23 @@ data "aws_iam_policy_document" "policy" {
 }
 
 resource "aws_s3_bucket_policy" "audit" {
-  bucket = "${aws_s3_bucket.abedra-goto-audit.bucket}"
+  bucket = "${aws_s3_bucket.abedra-audit.bucket}"
   policy = "${data.aws_iam_policy_document.policy.json}"
 }
 
-resource "aws_s3_bucket" "abedra-goto-audit" {
-  bucket        = "abedra-goto-audit"
+resource "aws_s3_bucket" "abedra-audit" {
+  bucket        = "abedra-audit"
   force_destroy = true
 }
 
 resource "aws_cloudtrail" "audit" {
   name                          = "audit"
-  s3_bucket_name                = "${aws_s3_bucket.abedra-goto-audit.id}"
+  s3_bucket_name                = "${aws_s3_bucket.abedra-audit.id}"
   s3_key_prefix                 = "audit"
   include_global_service_events = true
   depends_on                    = ["aws_s3_bucket_policy.audit"]
 }
 
-resource "aws_guardduty_detector" "GOTO" {
+resource "aws_guardduty_detector" "workshop" {
   enable = true
 }
