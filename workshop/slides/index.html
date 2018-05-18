@@ -32,23 +32,19 @@
 	      <br />Chief Scientist, Jemurai
 	    </small>
 	  </p>
-	  <p>
-	    <small>
-	      Chris Read <a href="https://twitter.com/cread">@cread</a>
-	    </small>
-	  </p>
 	</section>
 
 	<section>
 	  <h2>Agenda</h2>
 	  <ul>
 	    <li>Setup</li>
-	    <li>Introduction</li>
-	    <li>Terraform</li>
-	    <li>Auditing</li>
+	    <!-- <li>Introduction</li> -->
+	    <!-- <li>Terraform</li> -->
 	    <li>IAM</li>
-	    <li>Network Design</li>
+	    <li>CloudTrail</li>
 	    <li>Encryption and Key Management</li>
+	    <li>Auditing</li>
+	    <!-- <li>Network Design</li> -->
 	    <li>Wrap Up</li>
 	  </ul>
 	</section>
@@ -107,7 +103,7 @@
 	    <h2>Create a bucket for the workshop</h2>
 	    <pre>
 	      <code data-trim class="shell">
-aws s3 mb s3://abedra-goto-tfstate --region us-east-2
+aws s3 mb s3://abedra-tfstate --region us-east-2
 	      </code>
 	    </pre>
 	  </section>
@@ -129,8 +125,8 @@ provider "aws" {
 	    <pre>
 	      <code data-trim class="terraform">
 
-resource "aws_s3_bucket" "abedra-goto-tfstate" {
-  bucket = "abedra-goto-tfstate"
+resource "aws_s3_bucket" "abedra-tfstate" {
+  bucket = "abedra-tfstate"
   acl = "private"
 
   versioning {
@@ -146,7 +142,7 @@ resource "aws_s3_bucket" "abedra-goto-tfstate" {
 	      <code data-trim class="terraform">
 terraform {
   backend "s3" {
-    bucket = "abedra-goto-tfstate"
+    bucket = "abedra-tfstate"
     key = "setup/terraform.tfstate"
     region = "us-east-2"
   }
@@ -170,8 +166,8 @@ workshop/terraform> terraform init
 	    <pre>
 	      <code data-trim class="shell">
 workshop/terraform> terraform import \
-                    aws_s3_bucket.abedra-goto-tfstate \
-                    abedra-goto-tfstate
+                    aws_s3_bucket.abedra-tfstate \
+                    abedra-tfstate
 	      </code>
 	    </pre>
 	  </section>
@@ -439,8 +435,8 @@ resource "aws_iam_user" "audit" {
   name = "audit"
 }
 
-resource "aws_iam_user" "goto" {
-  name = "goto"
+resource "aws_iam_user" "operator" {
+  name = "operator"
 }
 	      </code>
 	    </pre>
@@ -461,7 +457,7 @@ variable "read_only_users" {
 variable "admin_users" {
   type = "list"
   description = "Admin Users"
-  default = [ "goto" ]
+  default = [ "operator" ]
 }
 	      </code>
 	    </pre>
@@ -551,7 +547,7 @@ jq 'getpath(["AccessKey", "AccessKeyId"], \
 	    </pre>
 	    <pre>
 	      <code data-trim class="shell">
-aws iam create-access-key --user-name goto | \
+aws iam create-access-key --user-name operator | \
 jq 'getpath(["AccessKey", "AccessKeyId"], \
 ["AccessKey", "SecretAccessKey"])'
 	      </code>
@@ -634,8 +630,8 @@ aws sts get-caller-identity
 }
 
 aws s3 ls
-2018-04-19 14:40:37 abedra-goto-audit
-2018-04-19 11:35:45 abedra-goto-tfstate
+2018-04-19 14:40:37 abedra-audit
+2018-04-19 11:35:45 abedra-tfstate
 	      </code>
 	    </pre>
 	  </section>
@@ -679,13 +675,12 @@ region = us-east-2
 region=us-east-2
 output=json
 role_arn=arn:aws:iam::489175270805:role/admin
-mfa_serial=arn:aws:iam::489175270805:mfa/abedra
+mfa_serial=arn:aws:iam::489175270805:mfa/operator
 
 [profile personal-read_only]
 region=us-east-2
 output=json
 role_arn=arn:aws:iam::489175270805:role/read_only
-mfa_serial=arn:aws:iam::489175270805:mfa/abedra
 	      </code>
 	    </pre>
 	  </section>
@@ -693,14 +688,14 @@ mfa_serial=arn:aws:iam::489175270805:mfa/abedra
 	    <h2>Now we import our credentials into vault</h2>
 	    <pre>
 	      <code data-trim class="shell">
-workshop/iam> aws-vault add personal-audit
+workshop/iam> aws-vault add personal-read_only
 Enter Access Key ID: XXX
 Enter Secret Access Key: XXX
-Added credentials to profile "personal-audit" in vault
-workshop/iam> aws-vault add personal-goto
+Added credentials to profile "personal-read_only" in vault
+workshop/iam> aws-vault add personal-admin
 Enter Access Key ID: XXX
 Enter Secret Access Key: XXX
-Added credentials to profile "personal-goto" in vault
+Added credentials to profile "personal-admin" in vault
 workshop/iam> aws-vault list
 personal-read_only
 personal-admin
@@ -712,8 +707,8 @@ personal-admin
 	    <pre>
 	      <code data-trim class="shell">
 workshop/iam> aws-vault exec personal-read_only -- aws s3 ls
-2018-04-19 14:40:37 abedra-goto-audit
-2018-04-19 11:35:45 abedra-goto-tfstate
+2018-04-19 14:40:37 abedra-audit
+2018-04-19 11:35:45 abedra-tfstate
 	      </code>
 	    </pre>
 	  </section>
@@ -760,7 +755,7 @@ workshop/iam> aws-vault exec personal-read_only -- aws s3 ls
 	    <h2>Start with the foundation</h2>
 	    <pre>
 	      <code data-trim class="terraform">
-resource "aws_vpc" "goto" {
+resource "aws_vpc" "workshop" {
     cidr_block = "10.1.0.0/16"
 }
 	      </code>
@@ -770,8 +765,8 @@ resource "aws_vpc" "goto" {
 	    <h2>Add a subnet</h2>
 	    <pre>
 	      <code data-trim class="terraform">
-resource "aws_subnet" "goto_subnet" {
-    vpc_id = "${aws_vpc.goto.id}"
+resource "aws_subnet" "workshop_subnet" {
+    vpc_id = "${aws_vpc.workshop.id}"
     cidr_block = "10.1.0.0/24"
     availability_zone = "us-east-2a"
 }
@@ -791,7 +786,7 @@ resource "aws_subnet" "goto_subnet" {
 resource "aws_security_group" "bastion_external" {
     name = "bastion_external_security_group"
     description = "Allowed external ports for bastion hosts"
-    vpc_id = "${aws_vpc.goto.id}"
+    vpc_id = "${aws_vpc.workshop.id}"
 
     ingress {
         from_port = 22
@@ -825,7 +820,7 @@ resource "aws_security_group" "bastion_external" {
 resource "aws_security_group" "internal_ssh" {
     name = "bastion_internal_security_group"
     description = "Allow SSH via internal instances"
-    vpc_id = "${aws_vpc.goto.id}"
+    vpc_id = "${aws_vpc.workshop.id}"
 
     ingress {
         from_port = 22
@@ -871,7 +866,7 @@ workshop/vpc> docker run nmap -Pn -T5 -sS -A [bastion_ip]
 resource "aws_security_group" "api_security_group" {
     name = "api_security_group"
     description = "Allowed inbound ports for api"
-    vpc_id = "${aws_vpc.goto.id}"
+    vpc_id = "${aws_vpc.workshop.id}"
 
     ingress {
         from_port = 80
@@ -891,7 +886,7 @@ resource "aws_instance" "api" {
     ami = "ami-ccecf5af"
     instance_type = "t2.micro"
     associate_public_ip_address = true
-    subnet_id = "${aws_subnet.goto_subnet.id}"
+    subnet_id = "${aws_subnet.workshop_subnet.id}"
     vpc_security_group_ids = [
         "${aws_security_group.api_security_group.id}",
         "${aws_security_group.internal_ssh.id}"
