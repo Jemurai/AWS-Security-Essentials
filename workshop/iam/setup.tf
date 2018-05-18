@@ -4,7 +4,7 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = "abedra-goto-tfstate"
+    bucket = "abedra-tfstate"
     key    = "iam/terraform.tfstate"
     region = "us-east-2"
   }

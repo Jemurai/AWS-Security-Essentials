@@ -2,8 +2,8 @@ provider "aws" {
   region = "us-east-2"
 }
 
-resource "aws_s3_bucket" "abedra-goto-tfstate" {
-  bucket = "abedra-goto-tfstate"
+resource "aws_s3_bucket" "abedra-tfstate" {
+  bucket = "abedra-tfstate"
   acl = "private"
   force_destroy = true
   versioning {
@@ -13,7 +13,7 @@ resource "aws_s3_bucket" "abedra-goto-tfstate" {
 
 terraform {
   backend "s3" {
-    bucket = "abedra-goto-tfstate"
+    bucket = "abedra-tfstate"
     key = "setup/terraform.tfstate"
     region = "us-east-2"
   }
