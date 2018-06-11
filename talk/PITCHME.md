@@ -37,6 +37,8 @@ Chief Scientist, Jemurai
 
 ## Introduction
 
+@fa[arrow-down]
+
 +++
 @title[Placeholder]
 
@@ -46,6 +48,8 @@ Chief Scientist, Jemurai
 @title[Terraform]
 
 ## Terraform
+
+@fa[arrow-down]
 
 +++
 
@@ -107,7 +111,7 @@ workshop/terraform> terraform init
 ## Import the bucket we just created
 
 ```sh
-workshop/terraform> terraform import \
+workshop/terraform> terraform import             \
                     aws_s3_bucket.abedra-tfstate \
                     abedra-tfstate
 ```
@@ -127,7 +131,12 @@ workshop/terraform> terraform apply
 
 +++
 
-## Check the buket in your AWS console to make sure this worked properly
+## Check the bucket
+
+```sh
+aws s3 ls s3://abedra-tfstate/setup --recursive
+2018-05-18 10:19:28       1845 setup/terraform.tfstate
+```
 
 +++
 
@@ -159,11 +168,11 @@ workshop/terraform> terraform apply
 
 +++
 
-## These logs provide actionable data that you can use to automate security response
+### These logs provide actionable data that you can use to automate security response
 
 +++
 
-## This is vital to to the auditing process and gives you a way to track every action taken on the platform
+### This is vital to to the auditing process and gives you a way to track every action taken on the platform
 
 +++
 
@@ -171,7 +180,7 @@ workshop/terraform> terraform apply
 
 +++
 
-## But you can use more advanced tooling to process CloudTrail events and issue alerts
+### But you can use more advanced tooling to process CloudTrail events and issue alerts
 
 +++
 
@@ -179,15 +188,15 @@ workshop/terraform> terraform apply
 
 +++
 
-## GuardDuty analyzes CloudTrail and alert on events that have high correlation with security issues
+### GuardDuty analyzes CloudTrail and alerts on events that have high correlation with security issues
 
 +++
 
-## It monitors outbound network connections and flags connections with known bad actors
+### It monitors outbound network connections and flags connections with known bad actors
 
 +++
 
-## It monitors dns requests and flags queries that resolve to known bad actors
+### It monitors dns requests and flags queries that resolve to known bad actors
 
 +++
 
@@ -195,15 +204,15 @@ workshop/terraform> terraform apply
 
 +++
 
-## And it alerts when overexposed resources are probed or attacked
+### And it alerts when overexposed resources are probed or attacked
 
 +++
 
-## It's new and under active development, so look for more features very soon
+### It's new and under active development, so look for more features very soon
 
 +++
 
-## Let's initialize terraform in the auditing directory
+### Initialize terraform in the auditing directory
 
 ```sh
 workshop/auditing> terraform init
@@ -213,9 +222,26 @@ workshop/auditing> terraform init
 
 ## Now let's review what we are going to add
 
++++?code=workshop/auditing/setup.tf
+
+@[1-3]
+@[5-11]
+@[13-13]
+@[15-16]
+@[18-21]
+@[23-24]
+@[28-29]
+@[31-34]
+@[36-37]
+@[39-44]
+@[48-51]
+@[53-56]
+@[58-64]
+@[66-68]
+
 +++
 
-## Finally, let's deploy CloudTrail and GuardDuty
+### Deploy CloudTrail and GuardDuty
 
 ```sh
 workshop/auditing> terraform plan
@@ -224,11 +250,16 @@ workshop/auditing> terraform apply
 
 +++
 
-## Navigate to the S3 bucket in the AWS console
+## Check the audit bucket
+
+```sh
+aws s3 ls s3://abedra-audit --recursive
+2018-06-11 12:10:51          0 audit/AWSLogs/489175270805/
+```
 
 +++
 
-## Check back throughout the day to see what ends up there
+## Examine the events
 
 ```json
 {
@@ -250,17 +281,21 @@ workshop/auditing> terraform apply
 
 +++
 
-## How do we know our AWS configuration doesn't have security issues?
+### How do we know our AWS configuration doesn't have security issues?
 
 +++
 
 ## Questions
+
+@ul
 
 - Do all our users have MFA enabled?
 - Do we have inactive users?
 - Do we have security groups that expose too much?
 - Do we have S3 buckets with improper access control?
 - How do we know that our users aren't abusing their permissions?
+
+@ulend
 
 +++
 
@@ -303,7 +338,7 @@ scout
 
 +++
 
-## Navigate to http://localhost:22222
+### Navigate to http://localhost:22222
 
 ```
 Fetching IAM config..
@@ -321,11 +356,11 @@ http://localhost:22222
 
 +++
 
-## Full Walkthrough
+## Walkthrough
 
 +++
 
-## There is also commercial tooling, but this is a great way to demonstrate ability
+### There is also commercial tooling, but this is a great way to get started
 
 +++
 
@@ -333,7 +368,7 @@ http://localhost:22222
 
 +++
 
-## Pick and choose your battles, not everything you find is an emergency
+### Pick and choose your battles, not everything you find is an emergency
 
 +++
 
@@ -345,11 +380,13 @@ http://localhost:22222
 
 +++
 
-## Setting up alarms like this can be a key differentiator in detecting and understanding a breach
+### Setting up alarms like this can be a key differentiator in detecting and understanding a breach
 
 +++
 
-## Other Alarm Possibilities
+### Other Alarm Possibilities
+
+@ul
 
 - Unusually high amout of KMS actions
 - New user created
@@ -358,9 +395,11 @@ http://localhost:22222
 - Anyone logs into the AWS console
 - Anything that would signal unexpected behavior
 
+@ulend
+
 +++
 
-## GuardDuty will trigger alerts on the big risks, but you can create alerts on any behavior you wish
+### GuardDuty will trigger alerts on the big risks, but you can create alerts on any behavior you wish
 
 +++
 
@@ -384,7 +423,7 @@ http://localhost:22222
 
 +++
 
-## They should only be able to assume roles that provide the level of access they need
+### They should only be able to assume roles that provide the level of access they need
 
 +++
 
@@ -396,7 +435,7 @@ http://localhost:22222
 
 +++
 
-## If you do it right, people won't care what cloud provider they are using
+### If you do it right, people won't care what cloud provider they are using
 
 +++
 
@@ -414,7 +453,6 @@ http://localhost:22222
 @[50-61]
 @[63-67]
 @[69-69]
-@[70-70]
 @[71-71]
 @[73-76]
 @[78-78]
@@ -431,11 +469,7 @@ http://localhost:22222
 
 +++
 
-## With these roles in place we create the ability to assume them
-
-+++
-
-## Let's run terraform
+### Deploy the changes
 
 ```sh
 workshop/iam> terraform init
@@ -445,7 +479,28 @@ workshop/iam> terraform apply
 
 +++
 
-## Log into the AWS console and explore the updates
+### Verify the changes
+
+```sh
+aws iam list-roles --query 'Roles[].RoleName'
+[
+    "admin",
+    "AWSServiceRoleForAmazonGuardDuty",
+    "read_only"
+]
+```
+
+```sh
+aws iam list-attached-role-policies --role-name admin
+{
+    "AttachedPolicies": [
+        {
+            "PolicyName": "AdministratorAccess",
+            "PolicyArn": "arn:aws:iam::aws:policy/AdministratorAccess"
+        }
+    ]
+}
+```
 
 +++
 

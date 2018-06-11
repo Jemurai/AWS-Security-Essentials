@@ -2,3 +2,4 @@ theme-override : assets/css/PITCHME.css
 mathjax : TeX-AMS_HTML-full
 charts : true
 theme: night
+highlight: vs2015
