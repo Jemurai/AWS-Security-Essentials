@@ -9,10 +9,10 @@ import base64
 def main():
     """Main"""
     kms = boto3.client('kms')
-    keys = kms.list_keys()
+    key_id = kms.describe_key(KeyId='alias/workshop')["KeyMetadata"]["KeyId"]
 
     cipher_text = kms.encrypt(
-        KeyId=keys['Keys'][0]['KeyId'],
+        KeyId=key_id,
         Plaintext="Attack at dawn"
     )
 

@@ -154,6 +154,8 @@ aws s3 ls s3://abedra-tfstate/setup --recursive
 
 ## Auditing
 
+@fa[arrow-down]
+
 +++
 
 ## How do we track what our users are doing?
@@ -409,6 +411,8 @@ http://localhost:22222
 
 ## IAM
 
+@fa[arrow-down]
+
 +++
 
 ## This is the foundation
@@ -507,20 +511,26 @@ aws iam list-attached-role-policies --role-name admin
 ### Grab keys for each of the newly created users
 
 ```sh
-aws iam create-access-key --user-name audit | \
-jq 'getpath(["AccessKey", "AccessKeyId"], \
-["AccessKey", "SecretAccessKey"])'
+aws iam create-access-key --user-name audit \
+--query 'AccessKey.[AccessKeyId,SecretAccessKey]'
+[
+    "XXX",
+    "XXX"
+]
 ```
 
 ```sh
-aws iam create-access-key --user-name operator | \
-jq 'getpath(["AccessKey", "AccessKeyId"], \
-["AccessKey", "SecretAccessKey"])'
+aws iam create-access-key --user-name operator \
+--query 'AccessKey.[AccessKeyId,SecretAccessKey]'
+[
+    "XXX",
+    "XXX"
+]
 ```
 
 +++
 
-## So how do we use these roles?
+## How do we use these roles?
 
 +++
 
@@ -532,25 +542,28 @@ jq 'getpath(["AccessKey", "AccessKeyId"], \
 
 +++
 
-## Before we try STS we need to know the arn of the role we want to assume
+### Before we try STS we need to know the arn of the role we want to assume
 
 +++
 
 ## List role arns
 
 ```sh
-aws iam list-roles | jq -r ".Roles | .[].Arn"
-arn:aws:iam::489175270805:role/admin
-arn:aws:iam::489175270805:role/read_only
+aws iam list-roles --query 'Roles[].Arn'
+[
+    "arn:aws:iam::489175270805:role/admin",
+    "arn:aws:iam::489175270805:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty",
+    "arn:aws:iam::489175270805:role/read_only"
+]
 ```
 
 +++
 
-## Users use their AWS credentials to get STS tokens that are used to make API calls
+### Users use their AWS credentials to get STS tokens that are used to make API calls
 
 +++
 
-## Use audit credentials
+### Switch to audit user's credentials
 
 ```sh
 export AWS_ACCESS_KEY_ID=XXX
@@ -559,7 +572,7 @@ export AWS_SECRET_ACCESS_KEY=xxx
 
 +++
 
-## Grab tokens
+### Acquire STS credentials
 
 ```sh
 aws sts assume-role                                 \
@@ -684,7 +697,7 @@ personal-admin
 
 +++
 
-## Let's give it a spin
+### Let's give it a spin
 
 ```sh
 workshop/iam> aws-vault exec personal-read_only -- aws s3 ls
@@ -694,11 +707,11 @@ workshop/iam> aws-vault exec personal-read_only -- aws s3 ls
 
 +++
 
-## Now that you have things setup you can remove all other permissions
+### Now that you have things setup you can remove all other permissions
 
 +++
 
-## This creates a clean separation and a good audit trail
+### This creates a clean separation and a good audit trail
 
 +++
 
@@ -707,6 +720,8 @@ workshop/iam> aws-vault exec personal-read_only -- aws s3 ls
 ---
 
 ## Network Design
+
+@fa[arrow-down]
 
 +++
 
@@ -775,11 +790,29 @@ workshop/iam> aws-vault exec personal-read_only -- aws s3 ls
 
 +++
 
-## Check the console to see inbound rules
+### Check security groups assigned to public instances
+
+```sh
+aws ec2 describe-instances           \
+--query "Reservations[].Instances[].[InstanceId,PublicIpAddress,SecurityGroups[].GroupName]"
+
+"i-02d6f02ed4cd65571",
+"18.220.232.57",
+[
+    "bastion_external_security_group"
+]
+
+"i-088a3499844e2f3b0",
+"18.222.41.186",
+[
+    "bastion_internal_security_group",
+    "api_security_group"
+]
+```
 
 +++
 
-## Or use the nmap docker image
+### Or use the nmap docker image
 
 ```sh
 workshop/vpc> docker build -t nmap .
@@ -792,7 +825,7 @@ workshop/vpc> docker run nmap -Pn -T5 -sS -A [bastion_ip]
 
 +++
 
-## Remember to keep things simple, but maintain proper boundaries
+### Remember to keep things simple, but maintain proper boundaries
 
 +++
 
@@ -801,6 +834,8 @@ workshop/vpc> docker run nmap -Pn -T5 -sS -A [bastion_ip]
 ---
 
 ## Encryption and Key Management
+
+@fa[arrow-down]
 
 +++
 
@@ -824,19 +859,23 @@ workshop/vpc> docker run nmap -Pn -T5 -sS -A [bastion_ip]
 
 +++
 
-## For this workshop we will use AES-256-GCM
+## For this workshop we will use `AES-256-GCM`
 
 +++
 
 ## A breakdown
 
+@ul
+
 - AES is the cipher core
 - 256 is length of the key in bits
 - GCM, short for Galois Counter Mode, is the cipher block mode
 
+@ulend
+
 +++
 
-## There are other AES options, but this is the strongest choice*
+### There are other AES options, but this is the strongest choice*
 
 +++
 
@@ -850,7 +889,7 @@ workshop/vpc> docker run nmap -Pn -T5 -sS -A [bastion_ip]
 
 +++
 
-## Test it out
+### Test it out
 
 ```sh
 workshop/kms/local> docker build -t local_aes .
@@ -862,10 +901,14 @@ workshop/kms/local> docker run local_aes
 
 ## Questions
 
+@ul
+
 - Does this solve our encryption problem?
 - How do we get a better key?
 - How do we protect the key material?
 - Is one encryption key enough?
+
+@ulend
 
 +++
 
@@ -873,19 +916,19 @@ workshop/kms/local> docker run local_aes
 
 +++
 
-## A hardware backed symmetric encryption service available via a simple API
+### A hardware backed symmetric encryption service available via a simple API
 
 +++
 
-## If you are encrypting anything inside of AWS, you should be using this service
+### If you are encrypting anything inside of AWS, you should be using this service
 
 +++
 
-## Any AWS service that stores data has a KMS option
+### Any AWS service that stores data has a KMS option
 
 +++
 
-## If you can, design your system to use RDS with KMS for data at rest
+### If you can, design your system to use RDS with KMS for data at rest
 
 +++
 
@@ -901,7 +944,7 @@ workshop/kms/local> docker run local_aes
 
 +++
 
-## Apply Setup
+### Deploy
 
 ```sh
 workshop/kms> terraform init
@@ -911,18 +954,22 @@ workshop/kms> terraform apply
 
 +++
 
-## This creates a KMS key with an alias and a dynamodb table
+### This creates a KMS key with an alias and a dynamodb table
 
 +++
 
-## We will use two types of encryption keys
+### We will use two types of encryption keys
+
+@ul
 
 - Key Encryption Keys (KEK)
 - Data Encryption Keys (DEK)
 
+@ulend
+
 +++
 
-## The dynamodb table is for data encryption keys
+### The dynamodb table is for data encryption keys
 
 +++
 
@@ -938,7 +985,7 @@ workshop/kms> terraform apply
 
 +++
 
-## Build and run
+### Build and run
 
 ```sh
 workshop/kms/kms_master> docker build -t kms_master .
@@ -947,33 +994,33 @@ workshop/kms/kms_master> docker run  \
 -e AWS_SECRET_ACCESS_KEY=XXX         \
 -e AWS_DEFAULT_REGION=us-east-2 \
 kms_master
-
+'base64 encoded string'
 'Attack at dawn'
 ```
 
 +++
 
-### This creates a black box encryption scenario with no abiliity to gain control of key material or change the encrption process
+### This creates black box encryption with no knowledge of key material
 
 +++
 
-## The downside is that it only works for data up to 4 kilobytes in size
+### The downside is that it only works for data up to 4 kilobytes in size
 
 +++
 
-## To solve our stated problem we will need to combine our use of KMS and isolated encryption
+### To solve our problem we will need to combine our use of KMS and local encryption
 
 +++
 
-## We do this by using KMS to generate and encrypt data encryption keys
+### We do this by using KMS to generate and encrypt data encryption keys
 
 +++
 
-## We store our encrypted data encryption keys in dynamodb
+### We will store our encrypted data encryption keys in dynamodb
 
 +++
 
-## Generate a DEK and insert it into dynamodb
+### Generate a DEK and insert it into dynamodb
 
 +++?code=workshop/kms/dynamo/insert_dek&lang=python
 
@@ -1004,11 +1051,7 @@ insert_dek
 
 +++
 
-## Let's do an end to end encryption operation using our dynamodb and kms backed encryption keys
-
-+++
-
-## Fetch and decrypt DEK
+### Now we can perform end to end encryption using dynamodb and kms backed encryption
 
 +++?code=workshop/kms/complete/dynamo_backed_aes&lang=python
 
@@ -1022,7 +1065,7 @@ insert_dek
 
 +++
 
-## Run the complete example
+### Run the complete example
 
 ```sh
 workshop/kms/complete> docker build -t complete .
@@ -1037,28 +1080,36 @@ complete
 
 +++
 
-## This assumes a single data encryption key for all data in an application
+### This assumes a single data encryption key for all data in an application
 
 +++
 
-## Other Options
+### Other Options
+
+@ul
 
 - A DEK per customer
 - A DEK per record
 - A DEK per shard
 
+@ulend
+
 +++
 
-## When using multiple DEKs, make sure to store the key id with the record in the database
+### When using multiple DEKs, make sure to store the key id with the record in the database
 
 +++
 
 ## Wrap Up
 
+@ul
+
 - Does this solve our encryption problem?
 - How do we get a better key?
 - How do we protect the key material?
 - Is one encryption key enough?
+
+@ulend
 
 +++
 
@@ -1066,4 +1117,4 @@ complete
 
 ---
 
-## Group discussion and questions
+## Parting thoughts and questions

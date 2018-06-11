@@ -9,7 +9,7 @@ import boto3
 def main():
     """Main"""
     kms = boto3.client('kms')
-    master_key_id = kms.list_keys()['Keys'][0]['KeyId']
+    master_key_id = kms.describe_key(KeyId='alias/workshop')["KeyMetadata"]["KeyId"]
     dek = kms.generate_data_key(
         KeyId=master_key_id,
         KeySpec='AES_256'
