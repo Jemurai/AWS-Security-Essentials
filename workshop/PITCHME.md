@@ -1,7 +1,6 @@
 ## AWS Security Essentials
 
-Aaron Bedra <a href="https://twitter.com/abedra">@abedra</a>
-<br/>
+Aaron Bedra [@abedra](https://twitter.com/abedra)  
 Chief Scientist, Jemurai
 
 ---
@@ -23,7 +22,7 @@ Chief Scientist, Jemurai
 @fa[arrow-down]
 
 +++
-@title[Checklist]
+@title[list]
 
 ## Checklist
 
@@ -35,18 +34,6 @@ Chief Scientist, Jemurai
 
 ---
 
-## Introduction
-
-@fa[arrow-down]
-
-+++
-@title[Placeholder]
-
-## Placeholder
-
----
-@title[Terraform]
-
 ## Terraform
 
 @fa[arrow-down]
@@ -57,11 +44,11 @@ Chief Scientist, Jemurai
 
 +++
 
-## As noted in the intro talk, this is an important first step
+### As noted in the intro talk, this is an important first step
 
 +++
 
-## We will be using terraform throughout the workshop to setup our AWS resources
+### We will be using terraform throughout the workshop to setup our AWS resources
 
 +++
 
@@ -81,7 +68,7 @@ Chief Scientist, Jemurai
 
 +++
 
-## Create a bucket for the workshop
+### Create a bucket for the workshop
 
 ```sh
 aws s3 mb s3://abedra-tfstate --region us-east-2
@@ -100,7 +87,7 @@ aws s3 mb s3://abedra-tfstate --region us-east-2
 
 +++
 
-## Initialize Terraform
+### Initialize Terraform
 
 ```sh
 workshop/terraform> terraform init
@@ -108,7 +95,7 @@ workshop/terraform> terraform init
 
 +++
 
-## Import the bucket we just created
+### Import the bucket we just created
 
 ```sh
 workshop/terraform> terraform import             \
@@ -118,7 +105,7 @@ workshop/terraform> terraform import             \
 
 +++
 
-## Finally, we apply our changes
+### Finally, we apply our changes
 
 ```sh
 workshop/terraform> terraform plan
@@ -127,11 +114,11 @@ workshop/terraform> terraform apply
 
 +++
 
-## Throughout the workshop we will use this bucket to store our terraform state
+### Throughout the workshop we will use this bucket to store our terraform state
 
 +++
 
-## Check the bucket
+### Check the bucket
 
 ```sh
 aws s3 ls s3://abedra-tfstate/setup --recursive
@@ -140,11 +127,11 @@ aws s3 ls s3://abedra-tfstate/setup --recursive
 
 +++
 
-## You don't have to store your `tfstate` in `S3` during this workshop
+### You don't have to store your `tfstate` in `S3` during this workshop
 
 +++
 
-## But if you are working with others in the same account it is recommended
+### But if you are working with others in the same account it is recommended
 
 +++
 
@@ -174,7 +161,11 @@ aws s3 ls s3://abedra-tfstate/setup --recursive
 
 +++
 
-### This is vital to to the auditing process and gives you a way to track every action taken on the platform
+### This is vital to to the auditing process
+
++++
+
+### And it gives you a way to track every action taken on the platform
 
 +++
 
@@ -182,7 +173,7 @@ aws s3 ls s3://abedra-tfstate/setup --recursive
 
 +++
 
-### But you can use more advanced tooling to process CloudTrail events and issue alerts
+### You can use more advanced tooling to process CloudTrail events and issue alerts
 
 +++
 
@@ -190,11 +181,11 @@ aws s3 ls s3://abedra-tfstate/setup --recursive
 
 +++
 
-### GuardDuty analyzes CloudTrail and alerts on events that have high correlation with security issues
+### GuardDuty analyzes CloudTrail and alerts on known security issues
 
 +++
 
-### It monitors outbound network connections and flags connections with known bad actors
+### It monitors outbound network connections and flags contact with known bad actors
 
 +++
 
@@ -252,7 +243,7 @@ workshop/auditing> terraform apply
 
 +++
 
-## Check the audit bucket
+### Check the audit bucket
 
 ```sh
 aws s3 ls s3://abedra-audit --recursive
@@ -261,16 +252,12 @@ aws s3 ls s3://abedra-audit --recursive
 
 +++
 
-## Examine the events
+### Examine the events
 
 ```json
 {
   "eventVersion":"1.02","userIdentity": {
-    "type":"Root",
-    "principalId":"489175270805",
-    "arn":"arn:aws:iam::489175270805:root",
-    "accountId":"489175270805",
-    "accessKeyId":"ASIAIYHVC5VYM22SHTXQ",
+      "...SNIP..."
   },
   "eventTime":"2017-11-24T22:12:51Z",
   "eventName":"GetAccountPasswordPolicy",
@@ -301,7 +288,7 @@ aws s3 ls s3://abedra-audit --recursive
 
 +++
 
-## Let's ask!
+### Let's ask!
 
 ```sh
 workshop/auditing/mfa> docker build -t mfa_audit .
@@ -327,7 +314,7 @@ inactive_user_audit
 
 +++
 
-## Let's try something a little more effective
+### Let's try something a little more effective
 
 ```sh
 workshop/auditing/scout2> docker build -t scout .
@@ -340,9 +327,9 @@ scout
 
 +++
 
-### Navigate to http://localhost:22222
+### Navigate to [localhost:2222](http://localhost:22222)
 
-```
+```fundamental
 Fetching IAM config..
 ... Lots of output ...
 *** Visit ***
@@ -378,11 +365,11 @@ http://localhost:22222
 
 +++
 
-<p>https://aws.amazon.com/blogs/security/how-to-receive-notifications-when-your-aws-accounts-root-access-keys-are-used/</p>
+[https://aws.amazon.com/blogs/security/how-to-receive-notifications-when-your-aws-accounts-root-access-keys-are-used](https://aws.amazon.com/blogs/security/how-to-receive-notifications-when-your-aws-accounts-root-access-keys-are-used)
 
 +++
 
-### Setting up alarms like this can be a key differentiator in detecting and understanding a breach
+### Alarms like this are key in detecting and understanding a breach
 
 +++
 
@@ -401,7 +388,7 @@ http://localhost:22222
 
 +++
 
-### GuardDuty will trigger alerts on the big risks, but you can create alerts on any behavior you wish
+### GuardDuty triggers alerts, but you can defing alerts on additional conditions
 
 +++
 
@@ -427,7 +414,7 @@ http://localhost:22222
 
 +++
 
-### They should only be able to assume roles that provide the level of access they need
+### They should only be able to assume roles that provide required access
 
 +++
 
@@ -435,7 +422,7 @@ http://localhost:22222
 
 +++
 
-## But it requires you to have a high degree of automation
+### But it requires you to have a high degree of automation
 
 +++
 
@@ -538,7 +525,7 @@ aws iam create-access-key --user-name operator \
 
 +++
 
-## Security Token Service provides temporary, limited credentials
+### Security Token Service provides temporary, limited credentials
 
 +++
 
@@ -546,7 +533,7 @@ aws iam create-access-key --user-name operator \
 
 +++
 
-## List role arns
+### List role arns
 
 ```sh
 aws iam list-roles --query 'Roles[].Arn'
@@ -593,7 +580,7 @@ aws sts assume-role                                 \
 
 +++
 
-## Set the environment
+### Set the environment
 
 ```sh
 export AWS_ACCESS_KEY_ID=XXX
@@ -603,7 +590,7 @@ export AWS_SESSION_TOKEN=XXX
 
 +++
 
-## Verify
+### Verify
 
 ```sh
 aws sts get-caller-identity
@@ -626,7 +613,7 @@ aws s3 ls
 
 +++
 
-### aws-vault
+# aws-vault
 
 +++
 
@@ -654,7 +641,7 @@ aws s3 ls
 
 +++
 
-<p>https://github.com/99designs/aws-vault</p>
+[https://github.com/99designs/aws-vault](https://github.com/99designs/aws-vault)
 
 +++
 
@@ -679,7 +666,7 @@ role_arn=arn:aws:iam::489175270805:role/read_only
 
 +++
 
-## Now we import our credentials into vault
+### Now we import our credentials into vault
 
 ```sh
 workshop/iam> aws-vault add personal-read_only
@@ -798,16 +785,12 @@ aws ec2 describe-instances           \
 
 "i-02d6f02ed4cd65571",
 "18.220.232.57",
-[
-    "bastion_external_security_group"
-]
+"bastion_external_security_group"
 
 "i-088a3499844e2f3b0",
 "18.222.41.186",
-[
-    "bastion_internal_security_group",
-    "api_security_group"
-]
+"bastion_internal_security_group",
+"api_security_group"
 ```
 
 +++
@@ -1031,7 +1014,7 @@ kms_master
 
 +++
 
-## Execute
+### Execute
 
 ```sh
 workshop/kms/dynamo> docker build -t insert_dek .
@@ -1096,7 +1079,7 @@ complete
 
 +++
 
-### When using multiple DEKs, make sure to store the key id with the record in the database
+### With multiple DEKs, store the key id with the record in the database
 
 +++
 
