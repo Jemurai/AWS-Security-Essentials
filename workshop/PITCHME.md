@@ -388,7 +388,7 @@ http://localhost:22222
 
 +++
 
-### GuardDuty triggers alerts, but you can defing alerts on additional conditions
+### GuardDuty triggers alerts, but you can define alerts on additional conditions
 
 +++
 
