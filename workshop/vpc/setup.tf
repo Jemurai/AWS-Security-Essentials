@@ -50,7 +50,9 @@ resource "aws_security_group" "bastion_external" {
   }
 
   tags {
-    Name = "JIRA-1234"
+    Signoff = "JIRA-1234"
+    Owner = "Security"
+    CostCenter = "Reporting"
   }
 }
 

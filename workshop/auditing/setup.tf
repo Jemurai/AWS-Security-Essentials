@@ -60,6 +60,7 @@ resource "aws_cloudtrail" "audit" {
   s3_bucket_name                = "${aws_s3_bucket.abedra-audit.id}"
   s3_key_prefix                 = "audit"
   include_global_service_events = true
+  # enable_log_file_validation    = true
   depends_on                    = ["aws_s3_bucket_policy.audit"]
 }
 

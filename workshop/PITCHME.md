@@ -9,11 +9,11 @@ Chief Scientist, Jemurai
 ## Agenda
 
 - Setup
-- Auditing
 - IAM
-- Network Design
-- Encryption and Key Management
-- Wrap Up
+- CloudTrail
+- Encryption with KMS
+- Automated Security Auditing
+- Wrap-Up
 
 ---
 
